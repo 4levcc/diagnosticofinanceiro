@@ -1,0 +1,1963 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Diagnóstico interativo de maturidade financeira empresarial baseado em 6 dimensões e 49 indicadores. Avalie, visualize e exporte seu score.">
+<title>Score de Maturidade Financeira — Diagnóstico INOVARE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* =============================================
+   DESIGN SYSTEM — TOKENS
+   ============================================= */
+:root {
+  /* Palette */
+  --color-bg: #0b0f19;
+  --color-bg-subtle: #111827;
+  --color-surface: rgba(17, 24, 39, 0.7);
+  --color-surface-elevated: rgba(30, 41, 59, 0.55);
+  --color-border: rgba(148, 163, 184, 0.12);
+  --color-border-hover: rgba(148, 163, 184, 0.25);
+  --color-text: #f1f5f9;
+  --color-text-muted: #94a3b8;
+  --color-text-dim: #64748b;
+
+  /* Accent gradients */
+  --gradient-primary: linear-gradient(135deg, #6366f1, #8b5cf6, #a78bfa);
+  --gradient-warm: linear-gradient(135deg, #f59e0b, #ef4444);
+  --gradient-cool: linear-gradient(135deg, #06b6d4, #3b82f6);
+  --gradient-success: linear-gradient(135deg, #10b981, #34d399);
+  --gradient-hero: linear-gradient(160deg, #0f172a 0%, #1e1b4b 40%, #312e81 70%, #1e1b4b 100%);
+
+  /* Dimension colors */
+  --dim-controles: #3b82f6;
+  --dim-capital: #f59e0b;
+  --dim-projecoes: #f97316;
+  --dim-custos: #ef4444;
+  --dim-resultados: #e11d48;
+  --dim-indicadores: #a855f7;
+
+  /* Severity */
+  --severity-critical: #ef4444;
+  --severity-warning: #f59e0b;
+  --severity-success: #10b981;
+  --severity-info: #6366f1;
+
+  /* Sizing */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  /* Shadows */
+  --shadow-card: 0 4px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--color-border);
+  --shadow-glow: 0 0 60px rgba(99, 102, 241, 0.15);
+  --shadow-elevated: 0 8px 48px rgba(0, 0, 0, 0.45);
+
+  /* Transition */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 150ms var(--ease-out);
+  --transition-normal: 300ms var(--ease-out);
+  --transition-slow: 500ms var(--ease-out);
+}
+
+/* =============================================
+   RESET & BASE
+   ============================================= */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Ambient background effect */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.15), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(168, 85, 247, 0.08), transparent),
+    radial-gradient(ellipse 40% 30% at 10% 60%, rgba(59, 130, 246, 0.06), transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* =============================================
+   LAYOUT
+   ============================================= */
+.container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.grid-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .grid-main { grid-template-columns: 1fr; }
+}
+
+/* =============================================
+   GLASSMORPHISM CARD
+   ============================================= */
+.card {
+  background: var(--color-surface);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow-card);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-normal);
+}
+.card:hover {
+  border-color: var(--color-border-hover);
+}
+.card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: -0.01em;
+}
+.card-title .emoji {
+  font-size: 1.3rem;
+}
+
+/* =============================================
+   HERO HEADER
+   ============================================= */
+.hero {
+  background: var(--gradient-hero);
+  padding: 56px 24px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 36px;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle 400px at 30% 80%, rgba(99, 102, 241, 0.2), transparent),
+    radial-gradient(circle 300px at 70% 20%, rgba(168, 85, 247, 0.15), transparent);
+  pointer-events: none;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(to top, var(--color-bg), transparent);
+  pointer-events: none;
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+.hero h1 {
+  font-size: 2.6rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #e2e8f0, #ffffff, #c7d2fe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-subtitle {
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  font-weight: 400;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 100px;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #a5b4fc;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  letter-spacing: 0.02em;
+}
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 28px;
+}
+.hero-stat {
+  text-align: center;
+}
+.hero-stat-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-stat-label {
+  font-size: 0.78rem;
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+/* =============================================
+   COMPLETION PROGRESS BAR (top)
+   ============================================= */
+.completion-bar-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(11, 15, 25, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.completion-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+.completion-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(148, 163, 184, 0.1);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.completion-fill {
+  height: 100%;
+  border-radius: 100px;
+  background: var(--gradient-primary);
+  transition: width var(--transition-slow);
+  position: relative;
+}
+.completion-fill::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+  border-radius: 100px;
+}
+.completion-pct {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #a5b4fc;
+  min-width: 42px;
+  text-align: right;
+}
+
+/* =============================================
+   DIMENSION SECTIONS
+   ============================================= */
+.dim-section {
+  margin-bottom: 32px;
+  animation: fadeInUp 0.4s var(--ease-out) both;
+}
+.dim-section:nth-child(2) { animation-delay: 50ms; }
+.dim-section:nth-child(3) { animation-delay: 100ms; }
+.dim-section:nth-child(4) { animation-delay: 150ms; }
+.dim-section:nth-child(5) { animation-delay: 200ms; }
+.dim-section:nth-child(6) { animation-delay: 250ms; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dim-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 0;
+}
+.dim-header:hover .dim-toggle { background: rgba(255,255,255,0.08); }
+
+.dim-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1rem;
+  color: white;
+  flex-shrink: 0;
+  position: relative;
+}
+.dim-icon-badge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: inherit;
+  filter: blur(12px);
+  opacity: 0.35;
+  z-index: -1;
+}
+
+.dim-meta {
+  flex: 1;
+}
+.dim-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.dim-info {
+  font-size: 0.78rem;
+  color: var(--color-text-dim);
+  display: flex;
+  gap: 12px;
+  margin-top: 2px;
+}
+.dim-info span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dim-avg {
+  font-size: 1.5rem;
+  font-weight: 800;
+  min-width: 48px;
+  text-align: right;
+}
+
+.dim-toggle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast), transform var(--transition-normal);
+  color: var(--color-text-dim);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.dim-toggle.open { transform: rotate(180deg); }
+
+.dim-items {
+  overflow: hidden;
+  transition: max-height 0.4s var(--ease-out), opacity 0.3s ease;
+}
+.dim-items.collapsed {
+  max-height: 0 !important;
+  opacity: 0;
+}
+
+/* Individual item rows */
+.item-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+  gap: 16px;
+}
+.item-row:hover {
+  background: rgba(148, 163, 184, 0.05);
+}
+.item-index {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-dim);
+  min-width: 20px;
+}
+.item-label-wrap {
+  flex: 1;
+  min-width: 0;
+}
+.item-label-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+.item-label-desc {
+  font-size: 0.76rem;
+  color: var(--color-text-dim);
+  margin-top: 1px;
+}
+
+/* Score buttons (replacing slider) */
+.score-btns {
+  display: flex;
+  gap: 4px;
+}
+.score-btn {
+  width: 40px;
+  height: 36px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-dim);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.score-btn:hover {
+  border-color: var(--color-border-hover);
+  background: rgba(148, 163, 184, 0.08);
+  color: var(--color-text);
+}
+.score-btn.active-1 {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #f87171;
+}
+.score-btn.active-2 {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fbbf24;
+}
+.score-btn.active-3 {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #34d399;
+}
+.score-btn.active-4 {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.5);
+  color: #a5b4fc;
+}
+
+/* Score level labels */
+.score-level-label {
+  font-size: 0.68rem;
+  font-weight: 500;
+  min-width: 70px;
+  text-align: right;
+  transition: color var(--transition-fast);
+}
+
+/* =============================================
+   RIGHT PANEL — SCORE & RADAR
+   ============================================= */
+.right-panel {
+  position: sticky;
+  top: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+@media (max-width: 1024px) {
+  .right-panel { position: static; }
+}
+
+/* Big score display */
+.score-hero {
+  text-align: center;
+  padding: 36px 24px;
+  position: relative;
+}
+.score-ring-wrap {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 20px;
+}
+.score-ring-wrap canvas {
+  position: absolute;
+  inset: 0;
+}
+.score-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.score-number {
+  font-size: 3.6rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  transition: color var(--transition-normal);
+}
+.score-suffix {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--color-text-dim);
+  margin-left: 2px;
+}
+.score-label-text {
+  font-size: 0.82rem;
+  color: var(--color-text-dim);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.score-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 24px;
+  border-radius: 100px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: white;
+  margin-top: 8px;
+  transition: background var(--transition-normal);
+}
+
+/* Mini sparkline per dimension */
+.dim-summary-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+.dim-summary-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 4px;
+}
+.dim-summary-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.dim-summary-name {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+.dim-summary-score {
+  font-size: 0.9rem;
+  font-weight: 700;
+  min-width: 36px;
+  text-align: right;
+}
+.dim-summary-bar-wrap {
+  width: 80px;
+  height: 5px;
+  background: rgba(148, 163, 184, 0.1);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.dim-summary-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+  transition: width var(--transition-slow);
+}
+
+/* =============================================
+   RADAR CHART
+   ============================================= */
+.radar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.radar-canvas-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+canvas#radarCanvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Legend */
+.legend-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 20px;
+  margin-top: 16px;
+  width: 100%;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* =============================================
+   INSIGHTS
+   ============================================= */
+.insights-section {
+  margin-top: 32px;
+}
+.insight-item {
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border-left: 4px solid;
+  animation: fadeInUp 0.3s var(--ease-out) both;
+}
+.insight-item:nth-child(2) { animation-delay: 50ms; }
+.insight-item:nth-child(3) { animation-delay: 100ms; }
+.insight-item:nth-child(4) { animation-delay: 150ms; }
+.insight-item:nth-child(5) { animation-delay: 200ms; }
+.insight-item:nth-child(6) { animation-delay: 250ms; }
+.insight-item:nth-child(7) { animation-delay: 300ms; }
+
+.insight-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  line-height: 1.5;
+}
+.insight-text {
+  flex: 1;
+}
+.insight-text strong {
+  font-weight: 700;
+}
+
+.insight-critical {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: var(--severity-critical);
+  color: #fca5a5;
+}
+.insight-warning {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: var(--severity-warning);
+  color: #fcd34d;
+}
+.insight-success {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: var(--severity-success);
+  color: #6ee7b7;
+}
+.insight-info {
+  background: rgba(99, 102, 241, 0.08);
+  border-color: var(--severity-info);
+  color: #a5b4fc;
+}
+
+/* =============================================
+   EXPORT SECTION
+   ============================================= */
+.export-section {
+  margin-top: 28px;
+  margin-bottom: 60px;
+}
+.export-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+  position: relative;
+  overflow: hidden;
+}
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.06), transparent);
+  pointer-events: none;
+}
+.btn-primary {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(99, 102, 241, 0.4);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
+.btn-secondary {
+  background: var(--color-surface-elevated);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+.btn-secondary:hover {
+  background: rgba(30, 41, 59, 0.8);
+  color: var(--color-text);
+  border-color: var(--color-border-hover);
+}
+.btn-danger {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.export-area {
+  display: none;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--color-text-muted);
+  max-height: 500px;
+  overflow-y: auto;
+}
+.export-area::-webkit-scrollbar { width: 6px; }
+.export-area::-webkit-scrollbar-track { background: transparent; }
+.export-area::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.2); border-radius: 100px; }
+
+/* =============================================
+   SCORE SCALE GUIDE
+   ============================================= */
+.scale-guide {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  background: rgba(148, 163, 184, 0.04);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+.scale-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  color: var(--color-text-dim);
+  font-weight: 500;
+}
+.scale-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+/* =============================================
+   TOAST NOTIFICATION
+   ============================================= */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(120px);
+  background: rgba(30, 41, 59, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: var(--color-text);
+  padding: 14px 28px;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 500;
+  z-index: 1000;
+  box-shadow: var(--shadow-elevated);
+  border: 1px solid var(--color-border);
+  transition: transform 0.4s var(--ease-out), opacity 0.4s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* =============================================
+   ACTION BAR (bottom of form)
+   ============================================= */
+.actions-bar {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+@media (max-width: 768px) {
+  .hero { padding: 40px 16px 36px; }
+  .hero h1 { font-size: 1.8rem; }
+  .hero-stats { gap: 24px; }
+  .hero-stat-value { font-size: 1.4rem; }
+  .container { padding: 0 16px; }
+  .card { padding: 20px; }
+  .score-btns { gap: 3px; }
+  .score-btn { width: 34px; height: 32px; font-size: 0.8rem; }
+  .item-row { padding: 10px 8px; gap: 10px; }
+  .score-level-label { display: none; }
+  .legend-grid { grid-template-columns: 1fr; }
+  .scale-guide { gap: 4px; }
+  .dim-summary-bar-wrap { width: 50px; }
+}
+
+@media (max-width: 480px) {
+  .hero h1 { font-size: 1.5rem; }
+  .score-number { font-size: 2.8rem; }
+  .score-ring-wrap { width: 160px; height: 160px; }
+}
+
+/* =============================================
+   PRINT STYLES
+   ============================================= */
+@media print {
+  body { background: white; color: #1a1a1a; }
+  body::before { display: none; }
+  .completion-bar-wrap,
+  .actions-bar,
+  .export-section,
+  .score-btns,
+  .dim-toggle { display: none !important; }
+  .card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    box-shadow: none;
+    backdrop-filter: none;
+    break-inside: avoid;
+  }
+  .hero {
+    background: #f8fafc;
+    border-bottom: 2px solid #e5e7eb;
+  }
+  .hero h1 {
+    background: none;
+    -webkit-text-fill-color: #1a1a1a;
+    color: #1a1a1a;
+  }
+  .dim-items { max-height: none !important; opacity: 1 !important; }
+  .insight-item { break-inside: avoid; }
+}
+
+/* =============================================
+   CUSTOM SCROLLBAR
+   ============================================= */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 100px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.25); }
+
+/* Tooltip */
+.tooltip-wrap {
+  position: relative;
+}
+.tooltip-wrap::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.95);
+  background: rgba(15, 23, 42, 0.95);
+  color: var(--color-text);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  z-index: 10;
+  border: 1px solid var(--color-border);
+}
+.tooltip-wrap:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+</style>
+</head>
+<body>
+
+<!-- ========================================
+     COMPLETION BAR
+     ======================================== -->
+<div class="completion-bar-wrap" id="completionBar">
+  <span class="completion-label">Progresso da Avaliação</span>
+  <div class="completion-bar">
+    <div class="completion-fill" id="completionFill" style="width: 0%"></div>
+  </div>
+  <span class="completion-pct" id="completionPct">0%</span>
+</div>
+
+<!-- ========================================
+     HERO HEADER
+     ======================================== -->
+<header class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span>✦</span> INOVARE Consultoria Empresarial
+    </div>
+    <h1>Score de Maturidade<br>Financeira</h1>
+    <p class="hero-subtitle">
+      Diagnóstico interativo para avaliar a saúde financeira da sua empresa em 6 dimensões estratégicas
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-value">6</div>
+        <div class="hero-stat-label">Dimensões</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">49</div>
+        <div class="hero-stat-label">Indicadores</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">4</div>
+        <div class="hero-stat-label">Níveis</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ========================================
+     MAIN GRID
+     ======================================== -->
+<div class="container">
+  <div class="grid-main">
+
+    <!-- LEFT: ASSESSMENT FORM -->
+    <div>
+      <div class="card">
+        <div class="card-title">
+          <span class="emoji">📝</span>
+          Avaliação por Dimensão
+        </div>
+
+        <!-- Scale guide -->
+        <div class="scale-guide">
+          <div class="scale-item">
+            <div class="scale-dot" style="background: #ef4444;"></div>
+            1 — Não domina
+          </div>
+          <div class="scale-item">
+            <div class="scale-dot" style="background: #f59e0b;"></div>
+            2 — Domina parcial
+          </div>
+          <div class="scale-item">
+            <div class="scale-dot" style="background: #10b981;"></div>
+            3 — Domina
+          </div>
+          <div class="scale-item">
+            <div class="scale-dot" style="background: #6366f1;"></div>
+            4 — Domina e aplica
+          </div>
+        </div>
+
+        <div id="dimensionsContainer"></div>
+
+        <div class="actions-bar">
+          <button class="btn btn-danger" onclick="resetForm()" id="btnReset">
+            <span>↺</span> Resetar Tudo
+          </button>
+          <button class="btn btn-secondary" onclick="loadDemo()" id="btnDemo">
+            <span>📊</span> Carregar Média do Diagnóstico
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: RESULTS PANEL -->
+    <div class="right-panel">
+
+      <!-- Score Ring -->
+      <div class="card score-hero" id="scoreCard">
+        <div class="card-title" style="justify-content: center;">
+          <span class="emoji">🎯</span>
+          Score Geral
+        </div>
+        <div class="score-ring-wrap">
+          <canvas id="scoreRingCanvas" width="400" height="400"></canvas>
+          <div class="score-center">
+            <div>
+              <span class="score-number" id="totalScore">0</span>
+              <span class="score-suffix">/100</span>
+            </div>
+            <div class="score-label-text">Score Ponderado</div>
+          </div>
+        </div>
+        <span class="score-badge" id="scoreBadge" style="background: #ef4444;">Inicial</span>
+
+        <!-- Dimension summary -->
+        <div class="dim-summary-grid" id="dimSummary"></div>
+      </div>
+
+      <!-- Radar -->
+      <div class="card radar-wrap">
+        <div class="card-title" style="justify-content: center;">
+          <span class="emoji">📡</span>
+          Radar de Maturidade
+        </div>
+        <div class="radar-canvas-wrap">
+          <canvas id="radarCanvas" width="480" height="420"></canvas>
+        </div>
+        <div class="legend-grid" id="legendGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       INSIGHTS
+       ======================================== -->
+  <div class="insights-section">
+    <div class="card">
+      <div class="card-title">
+        <span class="emoji">💡</span>
+        Insights Automáticos
+      </div>
+      <div id="insightsContainer"></div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       EXPORT
+       ======================================== -->
+  <div class="export-section">
+    <div class="card">
+      <div class="card-title">
+        <span class="emoji">📤</span>
+        Exportar Resultado
+      </div>
+      <div class="export-btns">
+        <button class="btn btn-primary" onclick="generateReport()" id="btnReport">
+          <span>📄</span> Gerar Relatório
+        </button>
+        <button class="btn btn-secondary" onclick="copyReport()" id="btnCopy">
+          <span>📋</span> Copiar
+        </button>
+        <button class="btn btn-secondary" onclick="window.print()" id="btnPrint">
+          <span>🖨️</span> Imprimir / PDF
+        </button>
+      </div>
+      <div class="export-area" id="exportArea"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// CONFIGURATION — 6 DIMENSIONS, 49 INDICATORS
+// ============================================================
+const dimensions = [
+  {
+    id: 'controles',
+    name: 'Controles Financeiros',
+    color: '#3b82f6',
+    weight: 0.18,
+    items: [
+      { label: 'Movimento de caixa', desc: 'Registro diário de entradas/saídas' },
+      { label: 'Movimento bancário', desc: 'Conciliação e acompanhamento' },
+      { label: 'Contas a pagar', desc: 'Gestão de obrigações' },
+      { label: 'Contas a receber', desc: 'Cobrança e inadimplência' },
+      { label: 'Pró-labore/retiradas', desc: 'Controle de retiradas dos sócios' },
+      { label: 'Fluxo de caixa', desc: 'Relatório periódico de fluxo' },
+      { label: 'Resultados financeiros', desc: 'Acompanhamento mensal' },
+      { label: 'Sistema integrado', desc: 'Integração entre áreas' },
+      { label: 'Plano de contas', desc: 'Categorização estruturada' }
+    ]
+  },
+  {
+    id: 'capital',
+    name: 'Capital de Giro',
+    color: '#f59e0b',
+    weight: 0.12,
+    items: [
+      { label: 'Determinação do CG', desc: 'Cálculo da necessidade' },
+      { label: 'Gerenciamento do CG', desc: 'Gestão do ciclo financeiro' },
+      { label: 'Composição de capital', desc: 'Próprio vs. terceiros' },
+      { label: 'Análise de inadimplência', desc: 'Índices e prevenção' }
+    ]
+  },
+  {
+    id: 'projecoes',
+    name: 'Projeções Financeiras',
+    color: '#f97316',
+    weight: 0.15,
+    items: [
+      { label: 'Projeção de vendas', desc: 'Previsão mensal' },
+      { label: 'Despesas financeiras', desc: 'Juros, taxas, empréstimos' },
+      { label: 'Despesas com pessoal', desc: 'Folha e encargos' },
+      { label: 'Despesas tributárias', desc: 'Impostos e contribuições' },
+      { label: 'Despesas com vendas', desc: 'Comissões e marketing' },
+      { label: 'Fornecedores/MP', desc: 'Projeção de compras' },
+      { label: 'Despesas administrativas', desc: 'Operação e estrutura' },
+      { label: 'Avaliação de fluxo', desc: 'Análise do resultado projetado' },
+      { label: 'Projetado vs. Realizado', desc: 'Comparação e ajustes' }
+    ]
+  },
+  {
+    id: 'custos',
+    name: 'Custos e Preço',
+    color: '#ef4444',
+    weight: 0.18,
+    items: [
+      { label: 'Gestão de custos/despesas', desc: 'Fixos, variáveis, diretos, indiretos' },
+      { label: 'Ficha técnica', desc: 'Custo detalhado por produto' },
+      { label: 'CMV/CSP', desc: 'Custo das mercadorias/serviços' },
+      { label: 'Impostos no preço', desc: 'Cálculo na formação' },
+      { label: 'Salários/encargos no preço', desc: 'Mão de obra na formação' },
+      { label: 'Despesas operacionais no preço', desc: 'Ocupação, comunicação, locomoção' },
+      { label: 'Depreciação no preço', desc: 'Ativo imobilizado' },
+      { label: 'Despesas de vendas no preço', desc: 'Comissões, inadimplência, propaganda' },
+      { label: 'Pró-labore no preço', desc: 'Remuneração sócios' },
+      { label: 'Margem de lucro', desc: 'Definição e acompanhamento' },
+      { label: 'Comparação com mercado', desc: 'Pesquisa de preços' },
+      { label: 'Planilha de precificação', desc: 'Ferramenta estruturada' }
+    ]
+  },
+  {
+    id: 'resultados',
+    name: 'Controle de Resultados',
+    color: '#e11d48',
+    weight: 0.18,
+    items: [
+      { label: 'DRE', desc: 'Demonstração de resultados' },
+      { label: 'Margem de contribuição', desc: 'Por produto/serviço' },
+      { label: 'Faturamento por produto', desc: 'Análise de receita' },
+      { label: 'Margem vs. Quantidade', desc: 'Relação volume x lucro' },
+      { label: 'CMV/CPV gerenciado', desc: 'Estoque e compras' },
+      { label: 'Ponto de equilíbrio', desc: 'Econômico e financeiro' },
+      { label: 'Margem de segurança', desc: 'Diferença para o PE' }
+    ]
+  },
+  {
+    id: 'indicadores',
+    name: 'Indicadores',
+    color: '#a855f7',
+    weight: 0.19,
+    items: [
+      { label: 'Lucro/prejuízo líquido', desc: 'Acompanhamento mensal' },
+      { label: 'Lucratividade', desc: 'Margem sobre receita' },
+      { label: 'Rentabilidade', desc: 'Retorno sobre investimento' },
+      { label: 'ROI', desc: 'Retorno do investimento' },
+      { label: 'Endividamento', desc: 'Índices de dívida' },
+      { label: 'Liquidez', desc: 'Corrente, geral, seca, imediata' },
+      { label: 'Análise vertical/horizontal', desc: 'Estrutura e evolução' },
+      { label: 'Benchmarking', desc: 'Comparação com mercado' }
+    ]
+  }
+];
+
+const LEVELS = {
+  1: { label: 'Não domina', color: '#ef4444', class: 'active-1' },
+  2: { label: 'Domina parcial', color: '#f59e0b', class: 'active-2' },
+  3: { label: 'Domina', color: '#10b981', class: 'active-3' },
+  4: { label: 'Domina e aplica', color: '#6366f1', class: 'active-4' },
+};
+
+// State
+const state = {};
+const collapsed = {};
+dimensions.forEach(d => {
+  state[d.id] = new Array(d.items.length).fill(1);
+  collapsed[d.id] = false;
+});
+
+// ============================================================
+// INITIALIZATION
+// ============================================================
+function init() {
+  renderDimensions();
+  renderLegend();
+  updateAll();
+}
+
+function renderDimensions() {
+  const container = document.getElementById('dimensionsContainer');
+  container.innerHTML = '';
+
+  dimensions.forEach((dim, dimIdx) => {
+    const section = document.createElement('div');
+    section.className = 'dim-section';
+    section.id = `dim_section_${dim.id}`;
+
+    // Header
+    const avgDisplay = getDimAvg(dim.id);
+    const avgColor = getScoreColor(avgDisplay);
+
+    let html = `
+      <div class="dim-header" onclick="toggleDimension('${dim.id}')">
+        <div class="dim-icon-badge" style="background: ${dim.color};">${dimIdx + 1}</div>
+        <div class="dim-meta">
+          <div class="dim-name">${dim.name}</div>
+          <div class="dim-info">
+            <span>⚖ Peso: ${(dim.weight * 100).toFixed(0)}%</span>
+            <span>📊 ${dim.items.length} indicadores</span>
+          </div>
+        </div>
+        <div class="dim-avg" id="dimAvg_${dim.id}" style="color: ${avgColor};">${avgDisplay.toFixed(1)}</div>
+        <div class="dim-toggle ${collapsed[dim.id] ? '' : 'open'}" id="dimToggle_${dim.id}">▼</div>
+      </div>
+    `;
+
+    // Items
+    html += `<div class="dim-items ${collapsed[dim.id] ? 'collapsed' : ''}" id="dimItems_${dim.id}">`;
+
+    dim.items.forEach((item, itemIdx) => {
+      const currentVal = state[dim.id][itemIdx];
+      html += `
+        <div class="item-row" id="row_${dim.id}_${itemIdx}">
+          <div class="item-index">${String(itemIdx + 1).padStart(2, '0')}</div>
+          <div class="item-label-wrap">
+            <div class="item-label-text">${item.label}</div>
+            <div class="item-label-desc">${item.desc}</div>
+          </div>
+          <div class="score-btns" id="btns_${dim.id}_${itemIdx}">
+            ${[1, 2, 3, 4].map(v => `
+              <button class="score-btn ${currentVal === v ? LEVELS[v].class : ''}"
+                onclick="setScore('${dim.id}', ${itemIdx}, ${v})"
+                id="btn_${dim.id}_${itemIdx}_${v}">${v}</button>
+            `).join('')}
+          </div>
+          <div class="score-level-label" id="levelLabel_${dim.id}_${itemIdx}" style="color: ${LEVELS[currentVal].color};">
+            ${LEVELS[currentVal].label}
+          </div>
+        </div>
+      `;
+    });
+
+    html += '</div>';
+    section.innerHTML = html;
+    container.appendChild(section);
+
+    // Set initial max-height for animation
+    requestAnimationFrame(() => {
+      const itemsEl = document.getElementById(`dimItems_${dim.id}`);
+      if (itemsEl && !collapsed[dim.id]) {
+        itemsEl.style.maxHeight = itemsEl.scrollHeight + 'px';
+      }
+    });
+  });
+}
+
+// ============================================================
+// INTERACTIONS
+// ============================================================
+function setScore(dimId, itemIdx, val) {
+  state[dimId][itemIdx] = val;
+
+  // Update buttons
+  [1, 2, 3, 4].forEach(v => {
+    const btn = document.getElementById(`btn_${dimId}_${itemIdx}_${v}`);
+    if (btn) {
+      btn.className = 'score-btn' + (v === val ? ' ' + LEVELS[v].class : '');
+    }
+  });
+
+  // Update level label
+  const label = document.getElementById(`levelLabel_${dimId}_${itemIdx}`);
+  if (label) {
+    label.textContent = LEVELS[val].label;
+    label.style.color = LEVELS[val].color;
+  }
+
+  // Brief row highlight
+  const row = document.getElementById(`row_${dimId}_${itemIdx}`);
+  if (row) {
+    row.style.background = `${LEVELS[val].color}11`;
+    setTimeout(() => { row.style.background = ''; }, 400);
+  }
+
+  updateAll();
+}
+
+function toggleDimension(dimId) {
+  collapsed[dimId] = !collapsed[dimId];
+  const items = document.getElementById(`dimItems_${dimId}`);
+  const toggle = document.getElementById(`dimToggle_${dimId}`);
+
+  if (collapsed[dimId]) {
+    items.style.maxHeight = items.scrollHeight + 'px';
+    requestAnimationFrame(() => {
+      items.classList.add('collapsed');
+      items.style.maxHeight = '0px';
+    });
+    toggle.classList.remove('open');
+  } else {
+    items.classList.remove('collapsed');
+    items.style.maxHeight = items.scrollHeight + 'px';
+    toggle.classList.add('open');
+    // After transition, remove maxHeight so content can grow
+    setTimeout(() => { items.style.maxHeight = 'none'; }, 400);
+  }
+}
+
+// ============================================================
+// CALCULATIONS
+// ============================================================
+function getDimAvg(dimId) {
+  const vals = state[dimId];
+  return vals.reduce((a, b) => a + b, 0) / vals.length;
+}
+
+function getScoreColor(avg) {
+  if (avg < 1.5) return '#ef4444';
+  if (avg < 2.5) return '#f59e0b';
+  if (avg < 3.2) return '#10b981';
+  return '#6366f1';
+}
+
+function getNivelInfo(score) {
+  if (score < 20) return { nivel: 'Crítico', color: '#ef4444', emoji: '🔴' };
+  if (score < 35) return { nivel: 'Inicial', color: '#f87171', emoji: '🟠' };
+  if (score < 50) return { nivel: 'Básico', color: '#f59e0b', emoji: '🟡' };
+  if (score < 65) return { nivel: 'Intermediário', color: '#fbbf24', emoji: '⚡' };
+  if (score < 80) return { nivel: 'Avançado', color: '#10b981', emoji: '✅' };
+  return { nivel: 'Excelência', color: '#6366f1', emoji: '🏆' };
+}
+
+function updateAll() {
+  const dimScores = {};
+  let totalWeighted = 0;
+
+  dimensions.forEach(dim => {
+    const avg = getDimAvg(dim.id);
+    dimScores[dim.id] = avg;
+    totalWeighted += avg * dim.weight;
+  });
+
+  // Score 0-100 (weighted average normalized from 1-4 scale)
+  const scoreGeral = ((totalWeighted - 1) / 3) * 100;
+
+  // Update dimension header averages
+  dimensions.forEach(dim => {
+    const avgEl = document.getElementById(`dimAvg_${dim.id}`);
+    if (avgEl) {
+      const avg = dimScores[dim.id];
+      avgEl.textContent = avg.toFixed(1);
+      avgEl.style.color = getScoreColor(avg);
+    }
+  });
+
+  // Update big score
+  animateScore(scoreGeral);
+
+  // Update badge
+  const badgeInfo = getNivelInfo(scoreGeral);
+  const badge = document.getElementById('scoreBadge');
+  badge.textContent = `${badgeInfo.emoji} ${badgeInfo.nivel}`;
+  badge.style.background = badgeInfo.color;
+
+  // Update score number color
+  document.getElementById('totalScore').style.color = badgeInfo.color;
+
+  // Score ring
+  drawScoreRing(scoreGeral, badgeInfo.color);
+
+  // Completion progress
+  updateCompletion();
+
+  // Dimension summary
+  updateDimSummary(dimScores);
+
+  // Radar chart
+  drawRadar(dimScores);
+
+  // Insights
+  generateInsights(dimScores, scoreGeral);
+}
+
+let currentAnimatedScore = 0;
+let scoreAnimFrame = null;
+
+function animateScore(target) {
+  if (scoreAnimFrame) cancelAnimationFrame(scoreAnimFrame);
+
+  const start = currentAnimatedScore;
+  const diff = target - start;
+  const duration = 400;
+  const startTime = performance.now();
+
+  function step(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+    currentAnimatedScore = start + diff * eased;
+    document.getElementById('totalScore').textContent = Math.round(currentAnimatedScore);
+    if (progress < 1) {
+      scoreAnimFrame = requestAnimationFrame(step);
+    }
+  }
+  scoreAnimFrame = requestAnimationFrame(step);
+}
+
+function updateCompletion() {
+  let changed = 0;
+  let total = 0;
+  dimensions.forEach(dim => {
+    state[dim.id].forEach(v => {
+      total++;
+      if (v > 1) changed++;
+    });
+  });
+  const pct = total > 0 ? (changed / total) * 100 : 0;
+  document.getElementById('completionFill').style.width = pct + '%';
+  document.getElementById('completionPct').textContent = Math.round(pct) + '%';
+}
+
+function updateDimSummary(dimScores) {
+  const el = document.getElementById('dimSummary');
+  el.innerHTML = dimensions.map(dim => {
+    const avg = dimScores[dim.id];
+    const pct = ((avg - 1) / 3) * 100;
+    const color = getScoreColor(avg);
+    return `
+      <div class="dim-summary-row">
+        <div class="dim-summary-dot" style="background: ${dim.color};"></div>
+        <div class="dim-summary-name">${dim.name}</div>
+        <div class="dim-summary-bar-wrap">
+          <div class="dim-summary-bar-fill" style="width: ${pct}%; background: ${color};"></div>
+        </div>
+        <div class="dim-summary-score" style="color: ${color};">${avg.toFixed(1)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============================================================
+// SCORE RING CANVAS
+// ============================================================
+function drawScoreRing(score, color) {
+  const canvas = document.getElementById('scoreRingCanvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const size = 200;
+
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
+  ctx.scale(dpr, dpr);
+
+  const cx = size / 2;
+  const cy = size / 2;
+  const radius = 82;
+  const lineWidth = 10;
+
+  ctx.clearRect(0, 0, size, size);
+
+  // Background ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(148, 163, 184, 0.08)';
+  ctx.lineWidth = lineWidth;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
+  // Progress ring
+  if (score > 0) {
+    const startAngle = -Math.PI / 2;
+    const endAngle = startAngle + (score / 100) * Math.PI * 2;
+
+    // Glow
+    ctx.save();
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 16;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, startAngle, endAngle);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    ctx.restore();
+
+    // Solid
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, startAngle, endAngle);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  }
+}
+
+// ============================================================
+// RADAR CHART
+// ============================================================
+function drawRadar(scores) {
+  const canvas = document.getElementById('radarCanvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const w = 480, h = 420;
+
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = '100%';
+  canvas.style.height = 'auto';
+  ctx.scale(dpr, dpr);
+
+  const cx = w / 2, cy = h / 2 + 8;
+  const radius = 140;
+  const n = dimensions.length;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Grid rings
+  for (let i = 1; i <= 4; i++) {
+    ctx.beginPath();
+    for (let j = 0; j < n; j++) {
+      const angle = (Math.PI * 2 / n) * j - Math.PI / 2;
+      const r = (radius / 4) * i;
+      const x = cx + Math.cos(angle) * r;
+      const y = cy + Math.sin(angle) * r;
+      if (j === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = i === 4 ? 'rgba(148, 163, 184, 0.15)' : 'rgba(148, 163, 184, 0.06)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Level number labels
+    if (i <= 4) {
+      const angle = -Math.PI / 2;
+      const labelR = (radius / 4) * i;
+      ctx.fillStyle = 'rgba(148, 163, 184, 0.3)';
+      ctx.font = '500 10px Inter, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(i.toString(), cx + 4, cy - labelR - 2);
+    }
+  }
+
+  // Axis lines
+  dimensions.forEach((dim, i) => {
+    const angle = (Math.PI * 2 / n) * i - Math.PI / 2;
+    const x = cx + Math.cos(angle) * radius;
+    const y = cy + Math.sin(angle) * radius;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.06)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  });
+
+  // Labels
+  dimensions.forEach((dim, i) => {
+    const angle = (Math.PI * 2 / n) * i - Math.PI / 2;
+    const labelR = radius + 28;
+    const lx = cx + Math.cos(angle) * labelR;
+    const ly = cy + Math.sin(angle) * labelR;
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // Name (split into lines)
+    const words = dim.name.split(' ');
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = '600 11px Inter, sans-serif';
+
+    if (words.length <= 2) {
+      ctx.fillText(dim.name, lx, ly);
+    } else {
+      ctx.fillText(words.slice(0, Math.ceil(words.length / 2)).join(' '), lx, ly - 7);
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '400 10px Inter, sans-serif';
+      ctx.fillText(words.slice(Math.ceil(words.length / 2)).join(' '), lx, ly + 7);
+    }
+
+    // Score value
+    const val = scores[dim.id];
+    const valR = radius + 48;
+    const vx = cx + Math.cos(angle) * valR;
+    const vy = cy + Math.sin(angle) * valR;
+    ctx.fillStyle = getScoreColor(val);
+    ctx.font = '700 11px Inter, sans-serif';
+    ctx.fillText(val.toFixed(1), lx, ly + (words.length <= 2 ? 14 : 20));
+  });
+
+  // Data area — gradient fill
+  ctx.beginPath();
+  dimensions.forEach((dim, i) => {
+    const angle = (Math.PI * 2 / n) * i - Math.PI / 2;
+    const val = scores[dim.id];
+    const r = (val / 4) * radius;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.closePath();
+
+  // Gradient fill
+  const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+  gradient.addColorStop(0, 'rgba(99, 102, 241, 0.25)');
+  gradient.addColorStop(1, 'rgba(99, 102, 241, 0.05)');
+  ctx.fillStyle = gradient;
+  ctx.fill();
+
+  // Border
+  ctx.strokeStyle = 'rgba(99, 102, 241, 0.6)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Data points
+  dimensions.forEach((dim, i) => {
+    const angle = (Math.PI * 2 / n) * i - Math.PI / 2;
+    const val = scores[dim.id];
+    const r = (val / 4) * radius;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+
+    // Glow
+    ctx.save();
+    ctx.shadowColor = dim.color;
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = dim.color;
+    ctx.fill();
+    ctx.restore();
+
+    // Point
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = dim.color;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(11, 15, 25, 0.6)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  });
+}
+
+// ============================================================
+// INSIGHTS ENGINE
+// ============================================================
+function generateInsights(scores, geral) {
+  const container = document.getElementById('insightsContainer');
+  const insights = [];
+
+  // Overall
+  if (geral < 20) {
+    insights.push({ type: 'critical', icon: '🚨', text: '<strong>Maturidade CRÍTICA.</strong> A empresa opera no modo "sobrevivência". Há risco elevado de descontinuidade. <strong>Prioridade absoluta:</strong> controles básicos e entender se o negócio é lucrativo.' });
+  } else if (geral < 40) {
+    insights.push({ type: 'warning', icon: '⚠️', text: '<strong>Maturidade BÁSICA.</strong> A empresa tem alguns controles operacionais, mas não consegue transformar dados em decisão. O gargalo está entre "registrar" e "interpretar".' });
+  } else if (geral < 60) {
+    insights.push({ type: 'warning', icon: '📈', text: '<strong>Maturidade INTERMEDIÁRIA.</strong> Há fundamentos, mas gaps importantes. A empresa precisa sistematizar processos e começar a usar indicadores para tomada de decisão.' });
+  } else if (geral < 80) {
+    insights.push({ type: 'success', icon: '✅', text: '<strong>Maturidade AVANÇADA.</strong> A empresa tem boa governança financeira. <strong>Oportunidade:</strong> otimizar indicadores, benchmarking e cenários estratégicos.' });
+  } else {
+    insights.push({ type: 'info', icon: '🏆', text: '<strong>Maturidade de EXCELÊNCIA.</strong> A empresa usa finanças como vantagem competitiva. <strong>Foco:</strong> inovação, expansão e M&A.' });
+  }
+
+  // Dimension-based insights
+  const sorted = dimensions.map(d => ({ ...d, score: scores[d.id] })).sort((a, b) => a.score - b.score);
+  const pior = sorted[0];
+  const segundaPior = sorted[1];
+  const melhor = sorted[sorted.length - 1];
+
+  if (pior.score < 1.5) {
+    insights.push({ type: 'critical', icon: '🔴', text: `<strong>${pior.name}</strong> é a dimensão mais crítica (${pior.score.toFixed(2)}/4). Isso representa um risco operacional imediato. Recomenda-se <strong>intervenção emergencial</strong> nesta área.` });
+  }
+  if (segundaPior.score < 2.0) {
+    insights.push({ type: 'warning', icon: '🟠', text: `<strong>${segundaPior.name}</strong> também apresenta fragilidade (${segundaPior.score.toFixed(2)}/4). A empresa tem pelo menos duas dimensões em estado crítico — sugiro abordagem <strong>sequencial, não paralela</strong>.` });
+  }
+
+  // Gap analysis
+  const gap = melhor.score - pior.score;
+  if (gap > 1.5) {
+    insights.push({ type: 'warning', icon: '📊', text: `<strong>Desequilíbrio severo:</strong> ${gap.toFixed(2)} pontos de diferença entre a melhor dimensão (${melhor.name}) e a pior (${pior.name}). Maturidade "desbalanceada" — fortalecer a fraqueza é mais importante que potencializar o ponto forte.` });
+  }
+
+  // Specific patterns
+  if (scores.indicadores < 1.8) {
+    insights.push({ type: 'critical', icon: '🎯', text: '<strong>Indicadores financeiros:</strong> a empresa "voa no escuro". Sem análise vertical/horizontal, liquidez e benchmarking, não é possível saber se está indo bem ou mal em relação ao mercado. Essa é a <strong>#1 causa de decisões baseadas em "achismo"</strong>.' });
+  }
+  if (scores.resultados < 2.0) {
+    insights.push({ type: 'critical', icon: '💰', text: '<strong>Controle de Resultados:</strong> a empresa provavelmente não sabe seu ponto de equilíbrio nem sua margem de segurança. Pode estar <strong>vendendo abaixo do custo</strong> em produtos/serviços específicos sem perceber.' });
+  }
+  if (scores.custos < 2.0) {
+    insights.push({ type: 'warning', icon: '🏷️', text: '<strong>Custos e Preço:</strong> precificação amadora. Sem ficha técnica e sem calcular todos os componentes (incluindo depreciação e pró-labore), o "lucro" pode ser apenas <strong>caixa que ainda pertence a fornecedores, bancos ou ao fisco</strong>.' });
+  }
+  if (scores.capital < 2.0) {
+    insights.push({ type: 'warning', icon: '🔄', text: '<strong>Capital de Giro:</strong> a empresa sente falta de dinheiro, mas pode não reconhecer que o problema é o <strong>ciclo financeiro</strong> (prazo de recebimento vs. pagamento), não a falta de vendas.' });
+  }
+  if (scores.controles > 3.0 && scores.indicadores < 2.0) {
+    insights.push({ type: 'info', icon: '🔍', text: '<strong>Padrão "Organizado mas Cego":</strong> controles operacionais bons, mas zero inteligência financeira. A empresa coleta dados, mas não os transforma em conhecimento. O <strong>ROI da consultoria aqui é alto</strong> — basta conectar o que já existe.' });
+  }
+  if (scores.projecoes > 2.5 && scores.resultados < 2.0) {
+    insights.push({ type: 'warning', icon: '⚡', text: '<strong>Incoerência:</strong> projeta o futuro, mas não controla o presente. Projeções sem base em resultados reais são <strong>"wishful thinking"</strong>. Fortalecer a DRE antes de investir em orçamentos sofisticados.' });
+  }
+
+  // Priority recommendation
+  if (geral < 60) {
+    const top3 = sorted.slice(0, 3);
+    insights.push({ type: 'info', icon: '🗺️', text: `<strong>Prioridade de atuação sugerida:</strong> 1º ${top3[0].name} (${top3[0].score.toFixed(1)}), 2º ${top3[1].name} (${top3[1].score.toFixed(1)}), 3º ${top3[2].name} (${top3[2].score.toFixed(1)}).` });
+  }
+
+  // Render
+  container.innerHTML = insights.map(ins => `
+    <div class="insight-item insight-${ins.type}">
+      <span class="insight-icon">${ins.icon}</span>
+      <span class="insight-text">${ins.text}</span>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// LEGEND
+// ============================================================
+function renderLegend() {
+  const grid = document.getElementById('legendGrid');
+  grid.innerHTML = dimensions.map(d => `
+    <div class="legend-item">
+      <div class="legend-dot" style="background: ${d.color};"></div>
+      <span>${d.name}</span>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// ACTIONS
+// ============================================================
+function resetForm() {
+  dimensions.forEach(dim => {
+    state[dim.id].fill(1);
+    dim.items.forEach((_, idx) => {
+      [1, 2, 3, 4].forEach(v => {
+        const btn = document.getElementById(`btn_${dim.id}_${idx}_${v}`);
+        if (btn) btn.className = 'score-btn' + (v === 1 ? ' active-1' : '');
+      });
+      const label = document.getElementById(`levelLabel_${dim.id}_${idx}`);
+      if (label) {
+        label.textContent = LEVELS[1].label;
+        label.style.color = LEVELS[1].color;
+      }
+    });
+  });
+
+  const exportArea = document.getElementById('exportArea');
+  exportArea.style.display = 'none';
+  exportArea.textContent = '';
+
+  updateAll();
+  showToast('✅ Formulário resetado');
+}
+
+function loadDemo() {
+  const medias = {
+    controles: 2.52,
+    capital: 2.01,
+    projecoes: 2.35,
+    custos: 2.19,
+    resultados: 1.89,
+    indicadores: 1.64
+  };
+
+  dimensions.forEach(dim => {
+    const target = medias[dim.id];
+    const n = dim.items.length;
+    const base = Math.floor(target);
+    const rem = target - base;
+
+    for (let i = 0; i < n; i++) {
+      let v = base;
+      if (i < Math.round(rem * n)) v += 1;
+      v = Math.max(1, Math.min(4, v));
+      state[dim.id][i] = v;
+
+      [1, 2, 3, 4].forEach(sv => {
+        const btn = document.getElementById(`btn_${dim.id}_${i}_${sv}`);
+        if (btn) btn.className = 'score-btn' + (sv === v ? ' ' + LEVELS[sv].class : '');
+      });
+      const label = document.getElementById(`levelLabel_${dim.id}_${i}`);
+      if (label) {
+        label.textContent = LEVELS[v].label;
+        label.style.color = LEVELS[v].color;
+      }
+    }
+  });
+
+  updateAll();
+  showToast('📊 Média do diagnóstico carregada');
+}
+
+// ============================================================
+// EXPORT
+// ============================================================
+function generateReport() {
+  const dimScores = {};
+  let totalWeighted = 0;
+  dimensions.forEach(dim => {
+    const avg = getDimAvg(dim.id);
+    dimScores[dim.id] = avg;
+    totalWeighted += avg * dim.weight;
+  });
+  const geral = ((totalWeighted - 1) / 3) * 100;
+  const nivelInfo = getNivelInfo(geral);
+
+  let report = `╔══════════════════════════════════════════════════╗\n`;
+  report += `║    SCORE DE MATURIDADE FINANCEIRA — INOVARE     ║\n`;
+  report += `╚══════════════════════════════════════════════════╝\n\n`;
+  report += `Data: ${new Date().toLocaleString('pt-BR')}\n`;
+  report += `Score Geral: ${geral.toFixed(1)}/100\n`;
+  report += `Nível: ${nivelInfo.emoji} ${nivelInfo.nivel}\n\n`;
+  report += `────────────────────────────────────────────────────\n`;
+  report += `DESEMPENHO POR DIMENSÃO (escala 1-4):\n`;
+  report += `────────────────────────────────────────────────────\n`;
+
+  dimensions.forEach(d => {
+    const avg = dimScores[d.id];
+    const bar = '█'.repeat(Math.round(avg * 3)) + '░'.repeat(12 - Math.round(avg * 3));
+    report += `  ${d.name.padEnd(24)} ${avg.toFixed(2)}  ${bar}  (peso ${(d.weight * 100).toFixed(0)}%)\n`;
+  });
+
+  report += `\n────────────────────────────────────────────────────\n`;
+  report += `DETALHAMENTO POR INDICADOR:\n`;
+  report += `────────────────────────────────────────────────────\n`;
+
+  dimensions.forEach(d => {
+    report += `\n  ● ${d.name.toUpperCase()}\n`;
+    d.items.forEach((item, i) => {
+      const v = state[d.id][i];
+      const stars = '★'.repeat(v) + '☆'.repeat(4 - v);
+      report += `    ${String(i + 1).padStart(2)}. ${item.label.padEnd(30)} ${stars}  (${v}/4)\n`;
+    });
+  });
+
+  report += `\n────────────────────────────────────────────────────\n`;
+  report += `Gerado por INOVARE Consultoria Empresarial\n`;
+
+  const area = document.getElementById('exportArea');
+  area.style.display = 'block';
+  area.textContent = report;
+  showToast('📄 Relatório gerado');
+}
+
+function copyReport() {
+  const area = document.getElementById('exportArea');
+  if (area.style.display === 'none' || !area.textContent) generateReport();
+
+  navigator.clipboard.writeText(area.textContent).then(() => {
+    showToast('📋 Relatório copiado para a área de transferência');
+  }).catch(() => {
+    // Fallback
+    const range = document.createRange();
+    range.selectNodeContents(area);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    document.execCommand('copy');
+    window.getSelection().removeAllRanges();
+    showToast('📋 Relatório copiado');
+  });
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => { toast.classList.remove('show'); }, 2800);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+init();
+
+// Resize handler for canvases
+window.addEventListener('resize', () => {
+  const dimScores = {};
+  dimensions.forEach(dim => { dimScores[dim.id] = getDimAvg(dim.id); });
+  drawRadar(dimScores);
+
+  let totalWeighted = 0;
+  dimensions.forEach(dim => { totalWeighted += dimScores[dim.id] * dim.weight; });
+  const geral = ((totalWeighted - 1) / 3) * 100;
+  const nivelInfo = getNivelInfo(geral);
+  drawScoreRing(geral, nivelInfo.color);
+});
+</script>
+</body>
+</html>
