@@ -884,6 +884,56 @@ canvas#radarCanvas {
 }
 
 /* =============================================
+   FOOTER
+   ============================================= */
+.site-footer {
+  margin-top: 60px;
+  padding: 36px 24px 32px;
+  text-align: center;
+  border-top: 1px solid var(--color-border);
+  position: relative;
+}
+.site-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 1px;
+  background: var(--gradient-primary);
+}
+.footer-brand {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  letter-spacing: 0.01em;
+}
+.footer-brand a {
+  color: #a5b4fc;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color var(--transition-fast);
+}
+.footer-brand a:hover {
+  color: #c7d2fe;
+  text-decoration: underline;
+}
+.footer-tagline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-dim);
+  letter-spacing: 0.03em;
+}
+.footer-tagline .rocket {
+  font-size: 1rem;
+}
+
+/* =============================================
    PRINT STYLES
    ============================================= */
 @media print {
@@ -1119,6 +1169,16 @@ canvas#radarCanvas {
     </div>
   </div>
 </div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-brand">
+    Desenvolvido por <strong>INOVARE Gestão Estratégica</strong> | <a href="https://www.inovarege.com.br" target="_blank" rel="noopener">www.inovarege.com.br</a>
+  </div>
+  <div class="footer-tagline">
+    <span class="rocket">🚀</span> 20 anos de consultoria + IA
+  </div>
+</footer>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
