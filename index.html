@@ -1597,7 +1597,7 @@ function updateCompletion() {
   dimensions.forEach(dim => {
     state[dim.id].forEach(v => {
       total++;
-      if (v > 1) changed++;
+      if (v > 0) changed++;
     });
   });
   const pct = total > 0 ? (changed / total) * 100 : 0;
