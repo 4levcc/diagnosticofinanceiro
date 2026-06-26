@@ -9,9 +9,6 @@
  * 4. Clique em "Implantar" > "Novo implantação" > tipo "Web app".
  * 5. Em "Executar como" escolha "Eu" e em "Quem pode acessar" escolha "Qualquer pessoa".
  * 6. Copie a URL gerada e cole no front-end na constante SCRIPT_URL.
- * 7. A primeira aba da planilha deve ter na linha 1 os cabeçalhos que batem com
- *    as chaves enviadas pelo front-end (Data, Nome, Email, CNPJ, Score Geral etc.).
- *    Se a aba estiver vazia, o script cria o cabeçalho automaticamente.
  */
 
 // Se o script NÃO foi criado a partir da planilha (scripts.google.com),
@@ -21,14 +18,17 @@
 function doPost(e) {
   try {
     const ss = getSpreadsheet();
-    const sheet = ss.getSheets()[0]; // usa a primeira aba
 
-    let headers = [];
-    if (sheet.getLastRow() === 0) {
-      headers = buildDefaultHeaders();
-      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-    } else {
-      headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    // Renomeia a primeira aba para "leads" se ainda não estiver
+    let sheet = ss.getSheets()[0];
+    if (sheet.getName() !== 'leads') {
+      sheet.setName('leads');
+    }
+
+    // Remove a aba "Respostas" se existir
+    const respostasSheet = ss.getSheetByName('Respostas');
+    if (respostasSheet) {
+      ss.deleteSheet(respostasSheet);
     }
 
     // e.parameter contém os dados quando Content-Type é application/x-www-form-urlencoded
@@ -37,21 +37,49 @@ function doPost(e) {
     // Log para depuração (Visualização > Logs do Apps Script)
     console.log('Parâmetros recebidos:', JSON.stringify(params));
 
-    // Monta a linha na ordem das colunas existentes
-    const row = headers.map(function(header) {
-      if (!header) return '';
-      const key = String(header).trim();
-      return params.hasOwnProperty(key) ? params[key] : '';
+    // A ordem dos cabeçalhos vem do front-end no parâmetro _headers
+    // (ex: "Data|Nome|Email|CNPJ|Score Geral|[Controles] Pergunta 1|...")
+    let orderedHeaders = [];
+    if (params._headers) {
+      orderedHeaders = String(params._headers)
+        .split('|')
+        .map(function(h) { return h.trim(); })
+        .filter(function(h) { return h && h !== '_headers'; });
+    }
+
+    // Lê os cabeçalhos atuais da planilha
+    let currentHeaders = [];
+    if (sheet.getLastRow() > 0) {
+      currentHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    }
+
+    // Determina o cabeçalho final:
+    // 1. Usa a ordem enviada pelo front-end (_headers)
+    // 2. Preserva no final quaisquer colunas extras que já existam na planilha
+    let finalHeaders = orderedHeaders.length > 0 ? orderedHeaders.slice() : currentHeaders.slice();
+    currentHeaders.forEach(function(h) {
+      const trimmed = String(h).trim();
+      if (trimmed && !finalHeaders.includes(trimmed)) {
+        finalHeaders.push(trimmed);
+      }
     });
 
-    // Adiciona campos novos que ainda não estão no cabeçalho
-    Object.keys(params).forEach(function(key) {
-      const trimmedKey = key.trim();
-      if (trimmedKey && !headers.includes(trimmedKey)) {
-        headers.push(trimmedKey);
-        sheet.getRange(1, headers.length).setValue(trimmedKey);
-        row.push(params[key]);
-      }
+    // Se ainda não houver cabeçalhos, usa o padrão básico
+    if (finalHeaders.length === 0) {
+      finalHeaders = buildDefaultHeaders();
+    }
+
+    // Atualiza a linha de cabeçalhos na planilha
+    if (finalHeaders.length > sheet.getLastColumn()) {
+      sheet.getRange(1, 1, 1, finalHeaders.length).setValues([finalHeaders]);
+    } else {
+      sheet.getRange(1, 1, 1, finalHeaders.length).setValues([finalHeaders]);
+    }
+
+    // Monta a linha de respostas na ordem exata dos cabeçalhos
+    const row = finalHeaders.map(function(header) {
+      const key = String(header).trim();
+      return params.hasOwnProperty(key) ? params[key] : '';
     });
 
     // Insere a linha de respostas
@@ -83,18 +111,5 @@ function getSpreadsheet() {
 }
 
 function buildDefaultHeaders() {
-  return [
-    'Data',
-    'Nome',
-    'Email',
-    'CNPJ',
-    'Score Geral',
-    'Score Controles',
-    'Score Capital',
-    'Score Projeções',
-    'Score Custos',
-    'Score Resultados',
-    'Score Indicadores'
-    // As perguntas individuais serão adicionadas automaticamente na primeira resposta
-  ];
+  return ['Data', 'Nome', 'Email', 'CNPJ', 'Score Geral'];
 }

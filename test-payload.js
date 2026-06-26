@@ -53,6 +53,7 @@ dimensions.forEach((dim) => {
 
 const urlParams = new URLSearchParams();
 payloadEntries.forEach(([key, value]) => urlParams.append(key, value));
+urlParams.append('_headers', payloadEntries.map(([key]) => key).join('|'));
 const body = urlParams.toString();
 
 console.log('Payload gerado:');

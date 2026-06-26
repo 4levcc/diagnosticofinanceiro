@@ -2313,10 +2313,13 @@ function enviarParaPlanilha() {
 
   const urlParams = new URLSearchParams();
   payloadEntries.forEach(([key, value]) => urlParams.append(key, value));
+  // Envia a ordem exata dos cabeçalhos para o Apps Script montar a planilha corretamente
+  urlParams.append('_headers', payloadEntries.map(([key]) => key).join('|'));
   const body = urlParams.toString();
 
   console.log('[enviarParaPlanilha] Payload:', body);
   console.log('[enviarParaPlanilha] Entries:', payloadEntries);
+  console.log('[enviarParaPlanilha] Headers order:', payloadEntries.map(([key]) => key));
 
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywpRJcCKymRUjqRXEz-Mm8lkJN-RPE84eCEQOBtC47JbjTs8geNbSLz3wESWk5LOFqvg/exec';
 

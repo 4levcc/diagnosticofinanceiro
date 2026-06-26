@@ -41,7 +41,7 @@ A primeira linha da aba deve conter os cabeçalhos correspondentes às chaves en
 - `Score Resultados`
 - `Score Indicadores`
 
-As perguntas individuais são enviadas no formato `[Dimensão] Texto da pergunta` e são adicionadas automaticamente pelo script na primeira resposta.
+As perguntas individuais são enviadas no formato `[Dimensão] Texto da pergunta` e são adicionadas automaticamente pelo script na ordem exata em que aparecem no diagnóstico. O front-end envia um parâmetro oculto `_headers` com a ordem correta das colunas, garantindo que a planilha sempre siga a sequência: Data → Nome → Email → CNPJ → scores → perguntas.
 
 ## Teste local do payload
 
