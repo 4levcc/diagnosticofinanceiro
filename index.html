@@ -2055,6 +2055,7 @@ function resetForm() {
   
   const btnPrint = document.getElementById('btnPrint');
   if (btnPrint) {
+    btnPrint.className = 'btn btn-secondary';
     btnPrint.setAttribute('disabled', 'true');
     btnPrint.style.opacity = '0.5';
     btnPrint.style.cursor = 'not-allowed';
@@ -2308,6 +2309,7 @@ function enviarParaPlanilha() {
     const btnPrint = document.getElementById('btnPrint');
     if (btnPrint) {
       btnPrint.removeAttribute('disabled');
+      btnPrint.className = 'btn btn-primary';
       btnPrint.style.opacity = '1';
       btnPrint.style.cursor = 'pointer';
       btnPrint.style.pointerEvents = 'auto';
