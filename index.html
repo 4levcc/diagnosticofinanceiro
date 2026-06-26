@@ -1053,6 +1053,38 @@ canvas#radarCanvas {
   opacity: 1;
   transform: translateX(-50%) scale(1);
 }
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 16px 24px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-elevated);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 9999;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all var(--transition-normal);
+  color: white;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+.toast-success {
+  border-left: 4px solid var(--severity-success);
+}
+.toast-error {
+  border-left: 4px solid var(--severity-critical);
+}
 </style>
 </head>
 <body>
@@ -1201,9 +1233,36 @@ canvas#radarCanvas {
   </div>
 
   <!-- ========================================
-       EXPORT
+       LEAD CAPTURE E EXPORT
        ======================================== -->
   <div class="export-section">
+    <div class="card" style="margin-bottom: 2rem;">
+      <div class="card-title">
+        <span class="emoji">💾</span>
+        Salvar Diagnóstico
+      </div>
+      <p style="color: var(--color-text-dim); margin-bottom: 1.5rem; font-size: 0.95rem;">Preencha seus dados para salvar as respostas do seu diagnóstico no nosso banco de dados.</p>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-dim); font-size: 0.9rem;">Nome completo *</label>
+          <input type="text" id="leadNome" placeholder="Seu nome" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; outline: none;">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-dim); font-size: 0.9rem;">E-mail *</label>
+          <input type="email" id="leadEmail" placeholder="seu@email.com" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; outline: none;">
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-dim); font-size: 0.9rem;">CNPJ (Opcional)</label>
+          <input type="text" id="leadCnpj" placeholder="00.000.000/0000-00" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; outline: none;">
+        </div>
+      </div>
+      
+      <button class="btn btn-primary" onclick="enviarParaPlanilha()" id="btnEnviarPlanilha" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+        <span>🚀</span> Enviar Respostas para Análise
+      </button>
+    </div>
+
     <div class="card">
       <div class="card-title">
         <span class="emoji">📤</span>
@@ -1216,7 +1275,7 @@ canvas#radarCanvas {
         <button class="btn btn-secondary" onclick="copyReport()" id="btnCopy">
           <span>📋</span> Copiar
         </button>
-        <button class="btn btn-secondary" disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;" id="btnPrint">
+        <button class="btn btn-secondary" disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;" id="btnPrint" onclick="window.print()">
           <span>🖨️</span> Imprimir / PDF
         </button>
       </div>
@@ -2169,6 +2228,85 @@ window.addEventListener('resize', () => {
   const nivelInfo = getNivelInfo(geral);
   drawScoreRing(geral, nivelInfo.color);
 });
+function showToast(message, type) {
+  const toast = document.getElementById('toast');
+  toast.className = 'toast toast-' + type + ' show';
+  toast.innerHTML = (type === 'success' ? '✅ ' : '❌ ') + message;
+  setTimeout(() => {
+    toast.className = 'toast';
+  }, 5000);
+}
+
+function enviarParaPlanilha() {
+  const nome = document.getElementById('leadNome').value.trim();
+  const email = document.getElementById('leadEmail').value.trim();
+  const cnpj = document.getElementById('leadCnpj').value.trim();
+  const btn = document.getElementById('btnEnviarPlanilha');
+
+  if (!nome || !email) {
+    showToast('Por favor, preencha Nome e E-mail.', 'error');
+    return;
+  }
+
+  let totalRespondidas = 0;
+  let totalPerguntas = 0;
+  dimensions.forEach(dim => {
+    totalRespondidas += state[dim.id].filter(v => v > 0).length;
+    totalPerguntas += dim.items.length;
+  });
+
+  if (totalRespondidas < totalPerguntas) {
+    showToast(`Responda todas as perguntas antes de enviar (${totalRespondidas}/${totalPerguntas}).`, 'error');
+    return;
+  }
+
+  btn.innerHTML = '<span>⏳</span> Enviando...';
+  btn.style.opacity = '0.7';
+  btn.style.pointerEvents = 'none';
+
+  const payload = {
+    data: new Date().toLocaleString('pt-BR'),
+    nome: nome,
+    email: email,
+    cnpj: cnpj,
+    scoreGeral: ((dimensions.map(d => getDimAvg(d.id)).reduce((a, b) => a + b, 0) / dimensions.length - 1) / 3 * 100).toFixed(1) + '%'
+  };
+
+  dimensions.forEach((dim) => {
+    payload[`score_${dim.id}`] = ((getDimAvg(dim.id) - 1) / 3 * 100).toFixed(1) + '%';
+    dim.items.forEach((item, idx) => {
+      payload[`${dim.id}_q${idx+1}`] = state[dim.id][idx] || 0;
+    });
+  });
+
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwdLokDSoZxVi_Kr-OIyzHcg9aCvh4-gDbK7rF7IvY6-hcHSX8PHd37QRgKBC-XIeZjyg/exec';
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(() => {
+    showToast('Dados enviados com sucesso!', 'success');
+    
+    const btnPrint = document.getElementById('btnPrint');
+    if (btnPrint) {
+      btnPrint.removeAttribute('disabled');
+      btnPrint.style.opacity = '1';
+      btnPrint.style.cursor = 'pointer';
+      btnPrint.style.pointerEvents = 'auto';
+    }
+
+    btn.innerHTML = '<span>✅</span> Enviado';
+  }).catch(err => {
+    console.error('Erro ao enviar:', err);
+    showToast('Ocorreu um erro ao enviar. Tente novamente.', 'error');
+    btn.innerHTML = '<span>🚀</span> Enviar Respostas para Análise';
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = 'auto';
+  });
+}
 </script>
+<div id="toast" class="toast"></div>
 </body>
 </html>
