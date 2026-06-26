@@ -1209,12 +1209,12 @@ canvas#radarCanvas {
       </div>
       <div class="export-btns">
         <button class="btn btn-primary" onclick="generateReport()" id="btnReport">
-          <span>📄</span> Gerar Relatório
+          <span>📄</span> Gerar Relatório de Texto
         </button>
         <button class="btn btn-secondary" onclick="copyReport()" id="btnCopy">
           <span>📋</span> Copiar
         </button>
-        <button class="btn btn-secondary" onclick="window.print()" id="btnPrint">
+        <button class="btn btn-secondary" disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;" id="btnPrint">
           <span>🖨️</span> Imprimir / PDF
         </button>
       </div>
