@@ -1086,8 +1086,8 @@ canvas#radarCanvas {
           <button class="btn btn-danger" onclick="resetForm()" id="btnReset">
             <span>↺</span> Resetar Tudo
           </button>
-          <button class="btn btn-secondary" onclick="loadDemo()" id="btnDemo">
-            <span>📊</span> Carregar Média do Diagnóstico
+          <button class="btn btn-secondary" onclick="toggleBenchmark()" id="btnBenchmark">
+            <span>📊</span> Benchmarking
           </button>
         </div>
       </div>
@@ -1878,46 +1878,91 @@ function resetForm() {
   exportArea.style.display = 'none';
   exportArea.textContent = '';
 
+  userStateBackup = null;
+  isBenchmarkActive = false;
+  const btnBenchmark = document.getElementById('btnBenchmark');
+  if (btnBenchmark) {
+    btnBenchmark.innerHTML = '<span>📊</span> Benchmarking';
+  }
+
   updateAll();
   showToast('✅ Formulário resetado');
 }
 
-function loadDemo() {
-  const medias = {
-    controles: 2.52,
-    capital: 2.01,
-    projecoes: 2.35,
-    custos: 2.19,
-    resultados: 1.89,
-    indicadores: 1.64
-  };
+let userStateBackup = null;
+let isBenchmarkActive = false;
 
-  dimensions.forEach(dim => {
-    const target = medias[dim.id];
-    const n = dim.items.length;
-    const base = Math.floor(target);
-    const rem = target - base;
-
-    for (let i = 0; i < n; i++) {
-      let v = base;
-      if (i < Math.round(rem * n)) v += 1;
-      v = Math.max(1, Math.min(4, v));
-      state[dim.id][i] = v;
-
-      [1, 2, 3, 4].forEach(sv => {
-        const btn = document.getElementById(`btn_${dim.id}_${i}_${sv}`);
-        if (btn) btn.className = 'score-btn' + (sv === v ? ' ' + LEVELS[sv].class : '');
+function toggleBenchmark() {
+  const btn = document.getElementById('btnBenchmark');
+  
+  if (isBenchmarkActive) {
+    // Restaurar estado do usuário
+    if (userStateBackup) {
+      dimensions.forEach(dim => {
+        state[dim.id] = [...userStateBackup[dim.id]];
+        // Atualiza UI
+        state[dim.id].forEach((v, i) => {
+          [1, 2, 3, 4].forEach(sv => {
+            const btnEl = document.getElementById(`btn_${dim.id}_${i}_${sv}`);
+            if (btnEl) btnEl.className = 'score-btn' + (sv === v ? ' ' + LEVELS[sv].class : '');
+          });
+          const label = document.getElementById(`levelLabel_${dim.id}_${i}`);
+          if (label) {
+            label.textContent = LEVELS[v].label;
+            label.style.color = LEVELS[v].color;
+          }
+        });
       });
-      const label = document.getElementById(`levelLabel_${dim.id}_${i}`);
-      if (label) {
-        label.textContent = LEVELS[v].label;
-        label.style.color = LEVELS[v].color;
-      }
     }
-  });
+    isBenchmarkActive = false;
+    if (btn) btn.innerHTML = '<span>📊</span> Benchmarking';
+    updateAll();
+    showToast('↩️ Retornado aos seus resultados');
+  } else {
+    // Salvar estado atual e carregar benchmark
+    userStateBackup = {};
+    dimensions.forEach(dim => {
+      userStateBackup[dim.id] = [...state[dim.id]];
+    });
+    
+    const medias = {
+      controles: 2.52,
+      capital: 2.01,
+      projecoes: 2.35,
+      custos: 2.19,
+      resultados: 1.89,
+      indicadores: 1.64
+    };
 
-  updateAll();
-  showToast('📊 Média do diagnóstico carregada');
+    dimensions.forEach(dim => {
+      const target = medias[dim.id];
+      const n = dim.items.length;
+      const base = Math.floor(target);
+      const rem = target - base;
+
+      for (let i = 0; i < n; i++) {
+        let v = base;
+        if (i < Math.round(rem * n)) v += 1;
+        v = Math.max(1, Math.min(4, v));
+        state[dim.id][i] = v;
+
+        [1, 2, 3, 4].forEach(sv => {
+          const btnEl = document.getElementById(`btn_${dim.id}_${i}_${sv}`);
+          if (btnEl) btnEl.className = 'score-btn' + (sv === v ? ' ' + LEVELS[sv].class : '');
+        });
+        const label = document.getElementById(`levelLabel_${dim.id}_${i}`);
+        if (label) {
+          label.textContent = LEVELS[v].label;
+          label.style.color = LEVELS[v].color;
+        }
+      }
+    });
+
+    isBenchmarkActive = true;
+    if (btn) btn.innerHTML = '<span>📊</span> Resultados Diagnóstico';
+    updateAll();
+    showToast('📊 Comparação de mercado ativada');
+  }
 }
 
 // ============================================================
