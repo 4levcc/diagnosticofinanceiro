@@ -1489,6 +1489,7 @@ function renderDimensions() {
       const itemsEl = document.getElementById(`dimItems_${dim.id}`);
       if (itemsEl && !collapsed[dim.id]) {
         itemsEl.style.maxHeight = itemsEl.scrollHeight + 'px';
+        setTimeout(() => { itemsEl.style.maxHeight = 'none'; }, 400);
       }
     });
   });
