@@ -1239,7 +1239,7 @@ canvas#radarCanvas {
     <div class="card" style="margin-bottom: 2rem;">
       <div class="card-title">
         <span class="emoji">💾</span>
-        Salvar Diagnóstico
+        Baixar Diagnóstico
       </div>
       <p style="color: var(--color-text-dim); margin-bottom: 1.5rem; font-size: 0.95rem;">Preencha seus dados para salvar as respostas do seu diagnóstico no nosso banco de dados.</p>
       
@@ -1259,7 +1259,7 @@ canvas#radarCanvas {
       </div>
       
       <button class="btn btn-primary" onclick="enviarParaPlanilha()" id="btnEnviarPlanilha" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-        <span>🚀</span> Enviar Respostas para Análise
+        <span>🚀</span> Acesso ao Resultado
       </button>
     </div>
 
@@ -2045,7 +2045,23 @@ function resetForm() {
   }
 
   updateAll();
-  showToast('✅ Formulário resetado');
+
+  const btnEnviar = document.getElementById('btnEnviarPlanilha');
+  if (btnEnviar) {
+    btnEnviar.innerHTML = '<span>🚀</span> Acesso ao Resultado';
+    btnEnviar.style.opacity = '1';
+    btnEnviar.style.pointerEvents = 'auto';
+  }
+  
+  const btnPrint = document.getElementById('btnPrint');
+  if (btnPrint) {
+    btnPrint.setAttribute('disabled', 'true');
+    btnPrint.style.opacity = '0.5';
+    btnPrint.style.cursor = 'not-allowed';
+    btnPrint.style.pointerEvents = 'none';
+  }
+
+  showToast('Formulário resetado', 'success');
 }
 
 let userStateBackup = null;
@@ -2301,7 +2317,7 @@ function enviarParaPlanilha() {
   }).catch(err => {
     console.error('Erro ao enviar:', err);
     showToast('Ocorreu um erro ao enviar. Tente novamente.', 'error');
-    btn.innerHTML = '<span>🚀</span> Enviar Respostas para Análise';
+    btn.innerHTML = '<span>🚀</span> Acesso ao Resultado';
     btn.style.opacity = '1';
     btn.style.pointerEvents = 'auto';
   });
