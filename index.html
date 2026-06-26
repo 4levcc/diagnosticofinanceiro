@@ -2290,22 +2290,35 @@ function enviarParaPlanilha() {
     indicadores: 'Indicadores'
   };
 
-  const urlParams = new URLSearchParams();
-  urlParams.append('Data', new Date().toLocaleString('pt-BR'));
-  urlParams.append('Nome', nome);
-  urlParams.append('Email', email);
-  urlParams.append('CNPJ', cnpj);
-  urlParams.append('Score Geral', ((dimensions.map(d => getDimAvg(d.id)).reduce((a, b) => a + b, 0) / dimensions.length - 1) / 3 * 100).toFixed(1) + '%');
+  const scoreGeralRaw = ((dimensions.map(d => getDimAvg(d.id)).reduce((a, b) => a + b, 0) / dimensions.length - 1) / 3 * 100);
+  const scoreGeral = (isFinite(scoreGeralRaw) ? scoreGeralRaw : 0).toFixed(1) + '%';
+
+  // Constrói payload na ordem exata das colunas da planilha
+  const payloadEntries = [
+    ['Data', new Date().toLocaleString('pt-BR')],
+    ['Nome', nome],
+    ['Email', email],
+    ['CNPJ', cnpj],
+    ['Score Geral', scoreGeral]
+  ];
 
   dimensions.forEach((dim) => {
     const dimPrefix = dimNames[dim.id];
-    urlParams.append(`Score ${dimPrefix}`, ((getDimAvg(dim.id) - 1) / 3 * 100).toFixed(1) + '%');
+    const dimAvgRaw = ((getDimAvg(dim.id) - 1) / 3 * 100);
+    payloadEntries.push([`Score ${dimPrefix}`, (isFinite(dimAvgRaw) ? dimAvgRaw : 0).toFixed(1) + '%']);
     dim.items.forEach((item, idx) => {
-      urlParams.append(`[${dimPrefix}] ${item.label}`, state[dim.id][idx] || 0);
+      payloadEntries.push([`[${dimPrefix}] ${item.label}`, state[dim.id][idx] || 0]);
     });
   });
 
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwdLokDSoZxVi_Kr-OIyzHcg9aCvh4-gDbK7rF7IvY6-hcHSX8PHd37QRgKBC-XIeZjyg/exec';
+  const urlParams = new URLSearchParams();
+  payloadEntries.forEach(([key, value]) => urlParams.append(key, value));
+  const body = urlParams.toString();
+
+  console.log('[enviarParaPlanilha] Payload:', body);
+  console.log('[enviarParaPlanilha] Entries:', payloadEntries);
+
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywpRJcCKymRUjqRXEz-Mm8lkJN-RPE84eCEQOBtC47JbjTs8geNbSLz3wESWk5LOFqvg/exec';
 
   fetch(SCRIPT_URL, {
     method: 'POST',
@@ -2313,7 +2326,7 @@ function enviarParaPlanilha() {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     },
-    body: urlParams.toString()
+    body: body
   }).then(() => {
     showToast('Dados enviados com sucesso!', 'success');
     
