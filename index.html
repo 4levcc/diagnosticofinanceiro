@@ -602,6 +602,55 @@ body::before {
 }
 
 /* =============================================
+   STACKED BARS 100%
+   ============================================= */
+.stacked-bars-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 24px;
+}
+@media (max-width: 600px) {
+  .stacked-bars-grid { grid-template-columns: 1fr; }
+}
+.stacked-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.stacked-bar-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.stacked-bar-name {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stacked-bar-wrap {
+  width: 70px;
+  height: 6px;
+  border-radius: 100px;
+  overflow: hidden;
+}
+.stacked-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+  transition: width var(--transition-slow);
+}
+.stacked-bar-score {
+  font-size: 0.95rem;
+  font-weight: 700;
+  min-width: 30px;
+  text-align: right;
+}
+
+/* =============================================
    RADAR CHART
    ============================================= */
 .radar-wrap {
@@ -1117,6 +1166,10 @@ canvas#radarCanvas {
         <!-- Dimension summary -->
         <div class="dim-summary-grid" id="dimSummary"></div>
       </div>
+      <!-- Stacked Bars 100% -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="stacked-bars-grid" id="stackedBarsContainer"></div>
+      </div>
 
       <!-- Radar -->
       <div class="card radar-wrap">
@@ -1498,6 +1551,7 @@ function updateAll() {
 
   // Dimension summary
   updateDimSummary(dimScores);
+  updateStackedBars(dimScores);
 
   // Radar chart
   drawRadar(dimScores);
@@ -1558,6 +1612,45 @@ function updateDimSummary(dimScores) {
           <div class="dim-summary-bar-fill" style="width: ${pct}%; background: ${color};"></div>
         </div>
         <div class="dim-summary-score" style="color: ${color};">${avg.toFixed(1)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateStackedBars(dimScores) {
+  const container = document.getElementById('stackedBarsContainer');
+  if (!container) return;
+
+  const sequence = [
+    'controles',
+    'resultados',
+    'custos',
+    'projecoes',
+    'capital',
+    'indicadores'
+  ];
+
+  container.innerHTML = sequence.map(dimId => {
+    const dim = dimensions.find(d => d.id === dimId);
+    if (!dim) return '';
+    const avg = dimScores[dim.id];
+    const pct = ((avg - 1) / 3) * 100;
+    
+    // Transparent background logic
+    const hex = dim.color.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    const bgTransparent = `rgba(${r}, ${g}, ${b}, 0.15)`;
+    
+    return `
+      <div class="stacked-bar-row">
+        <div class="stacked-bar-dot" style="background: ${dim.color};"></div>
+        <div class="stacked-bar-name">${dim.name}</div>
+        <div class="stacked-bar-wrap" style="background: ${bgTransparent};">
+          <div class="stacked-bar-fill" style="width: ${pct}%; background: ${dim.color};"></div>
+        </div>
+        <div class="stacked-bar-score" style="color: ${dim.color};">${avg.toFixed(1)}</div>
       </div>
     `;
   }).join('');
