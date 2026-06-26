@@ -2281,18 +2281,27 @@ function enviarParaPlanilha() {
   btn.style.opacity = '0.7';
   btn.style.pointerEvents = 'none';
 
-  const payload = {
-    data: new Date().toLocaleString('pt-BR'),
-    nome: nome,
-    email: email,
-    cnpj: cnpj,
-    scoreGeral: ((dimensions.map(d => getDimAvg(d.id)).reduce((a, b) => a + b, 0) / dimensions.length - 1) / 3 * 100).toFixed(1) + '%'
+  const dimNames = {
+    controles: 'Controles',
+    capital: 'Capital',
+    projecoes: 'Projeções',
+    custos: 'Custos',
+    resultados: 'Resultados',
+    indicadores: 'Indicadores'
   };
 
+  const formData = new FormData();
+  formData.append('Data', new Date().toLocaleString('pt-BR'));
+  formData.append('Nome', nome);
+  formData.append('Email', email);
+  formData.append('CNPJ', cnpj);
+  formData.append('Score Geral', ((dimensions.map(d => getDimAvg(d.id)).reduce((a, b) => a + b, 0) / dimensions.length - 1) / 3 * 100).toFixed(1) + '%');
+
   dimensions.forEach((dim) => {
-    payload[`score_${dim.id}`] = ((getDimAvg(dim.id) - 1) / 3 * 100).toFixed(1) + '%';
+    const dimPrefix = dimNames[dim.id];
+    formData.append(`Score ${dimPrefix}`, ((getDimAvg(dim.id) - 1) / 3 * 100).toFixed(1) + '%');
     dim.items.forEach((item, idx) => {
-      payload[`${dim.id}_q${idx+1}`] = state[dim.id][idx] || 0;
+      formData.append(`[${dimPrefix}] ${item.label}`, state[dim.id][idx] || 0);
     });
   });
 
@@ -2301,8 +2310,7 @@ function enviarParaPlanilha() {
   fetch(SCRIPT_URL, {
     method: 'POST',
     mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+    body: formData
   }).then(() => {
     showToast('Dados enviados com sucesso!', 'success');
     
