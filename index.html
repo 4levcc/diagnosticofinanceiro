@@ -1341,6 +1341,7 @@ const dimensions = [
 ];
 
 const LEVELS = {
+  0: { label: '', color: '#64748b', class: '' },
   1: { label: 'Não domina', color: '#ef4444', class: 'active-1' },
   2: { label: 'Domina parcial', color: '#f59e0b', class: 'active-2' },
   3: { label: 'Domina', color: '#10b981', class: 'active-3' },
@@ -1351,7 +1352,7 @@ const LEVELS = {
 const state = {};
 const collapsed = {};
 dimensions.forEach(d => {
-  state[d.id] = new Array(d.items.length).fill(1);
+  state[d.id] = new Array(d.items.length).fill(0);
   collapsed[d.id] = false;
 });
 
@@ -1488,7 +1489,8 @@ function toggleDimension(dimId) {
 // CALCULATIONS
 // ============================================================
 function getDimAvg(dimId) {
-  const vals = state[dimId];
+  const vals = state[dimId].filter(v => v > 0);
+  if (vals.length === 0) return 0;
   return vals.reduce((a, b) => a + b, 0) / vals.length;
 }
 
@@ -1515,11 +1517,14 @@ function updateAll() {
   dimensions.forEach(dim => {
     const avg = getDimAvg(dim.id);
     dimScores[dim.id] = avg;
-    totalWeighted += avg * dim.weight;
+    if (avg > 0) {
+      totalWeighted += avg * dim.weight;
+    }
   });
 
   // Score 0-100 (weighted average normalized from 1-4 scale)
-  const scoreGeral = ((totalWeighted - 1) / 3) * 100;
+  const scoreGeralRaw = ((totalWeighted - 1) / 3) * 100;
+  const scoreGeral = totalWeighted === 0 ? 0 : Math.max(0, scoreGeralRaw);
 
   // Update dimension header averages
   dimensions.forEach(dim => {
@@ -1953,16 +1958,16 @@ function renderLegend() {
 // ============================================================
 function resetForm() {
   dimensions.forEach(dim => {
-    state[dim.id].fill(1);
+    state[dim.id].fill(0);
     dim.items.forEach((_, idx) => {
       [1, 2, 3, 4].forEach(v => {
         const btn = document.getElementById(`btn_${dim.id}_${idx}_${v}`);
-        if (btn) btn.className = 'score-btn' + (v === 1 ? ' active-1' : '');
+        if (btn) btn.className = 'score-btn';
       });
       const label = document.getElementById(`levelLabel_${dim.id}_${idx}`);
       if (label) {
-        label.textContent = LEVELS[1].label;
-        label.style.color = LEVELS[1].color;
+        label.textContent = LEVELS[0].label;
+        label.style.color = LEVELS[0].color;
       }
     });
   });
@@ -2067,9 +2072,10 @@ function generateReport() {
   dimensions.forEach(dim => {
     const avg = getDimAvg(dim.id);
     dimScores[dim.id] = avg;
-    totalWeighted += avg * dim.weight;
+    if (avg > 0) totalWeighted += avg * dim.weight;
   });
-  const geral = ((totalWeighted - 1) / 3) * 100;
+  const scoreGeralRaw = ((totalWeighted - 1) / 3) * 100;
+  const geral = totalWeighted === 0 ? 0 : Math.max(0, scoreGeralRaw);
   const nivelInfo = getNivelInfo(geral);
 
   let report = `╔══════════════════════════════════════════════════╗\n`;
@@ -2096,8 +2102,8 @@ function generateReport() {
     report += `\n  ● ${d.name.toUpperCase()}\n`;
     d.items.forEach((item, i) => {
       const v = state[d.id][i];
-      const stars = '★'.repeat(v) + '☆'.repeat(4 - v);
-      report += `    ${String(i + 1).padStart(2)}. ${item.label.padEnd(30)} ${stars}  (${v}/4)\n`;
+      const stars = v > 0 ? '★'.repeat(v) + '☆'.repeat(4 - v) : '☆'.repeat(4);
+      report += `    ${String(i + 1).padStart(2)}. ${item.label.padEnd(30)} ${stars}  (${v > 0 ? v : '-'}/4)\n`;
     });
   });
 
@@ -2151,8 +2157,13 @@ window.addEventListener('resize', () => {
   drawRadar(dimScores);
 
   let totalWeighted = 0;
-  dimensions.forEach(dim => { totalWeighted += dimScores[dim.id] * dim.weight; });
-  const geral = ((totalWeighted - 1) / 3) * 100;
+  dimensions.forEach(dim => { 
+    const avg = dimScores[dim.id];
+    if (avg > 0) totalWeighted += avg * dim.weight; 
+  });
+  
+  const scoreGeralRaw = ((totalWeighted - 1) / 3) * 100;
+  const geral = totalWeighted === 0 ? 0 : Math.max(0, scoreGeralRaw);
   const nivelInfo = getNivelInfo(geral);
   drawScoreRing(geral, nivelInfo.color);
 });
