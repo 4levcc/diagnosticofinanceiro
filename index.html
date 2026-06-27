@@ -1085,6 +1085,93 @@ canvas#radarCanvas {
 .toast-error {
   border-left: 4px solid var(--severity-critical);
 }
+
+@media screen {
+  #printContainer { display: none !important; }
+}
+
+@media print {
+  @page { size: A4; margin: 0; }
+  body > *:not(#printContainer) { display: none !important; }
+  body { 
+    background: #ffffff !important; 
+    color: #1e293b !important; 
+    margin: 0; 
+    padding: 0;
+    min-height: auto;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+  }
+  
+  #printContainer {
+    display: block !important;
+    width: 100%;
+    background: #ffffff;
+  }
+
+  .print-page {
+    width: 210mm;
+    height: 297mm;
+    page-break-after: always;
+    page-break-inside: avoid;
+    position: relative;
+    box-sizing: border-box;
+    padding: 20mm;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .print-page:last-child { page-break-after: auto; }
+
+  .print-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
+  .print-logo { font-size: 24pt; font-weight: 900; color: #0f172a; letter-spacing: -1.5px; }
+  .print-header-text { font-size: 10pt; color: #64748b; text-transform: uppercase; letter-spacing: 1px; text-align: right; }
+  
+  .print-badge { display: inline-flex; align-items: center; background: #f1f5f9; padding: 6px 16px; border-radius: 20px; font-size: 10pt; font-weight: 600; color: #6366f1; margin-bottom: 20px; }
+  .print-badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #6366f1; margin-right: 8px; }
+  
+  .print-title { font-size: 36pt; font-weight: 800; color: #0f172a; line-height: 1.1; margin-bottom: 24px; letter-spacing: -1px; }
+  .print-subtitle { font-size: 14pt; color: #64748b; line-height: 1.5; margin-bottom: 40px; }
+  
+  .print-footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; background: #f8fafc; padding: 30px; border-radius: 16px; margin-top: auto; border: 1px solid #e2e8f0; }
+  .print-meta-label { font-size: 9pt; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; font-weight: 600; }
+  .print-meta-value { font-size: 14pt; font-weight: 700; color: #0f172a; }
+
+  .print-section-badge { font-size: 9pt; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;}
+  .print-section-badge::before { content: ''; width: 24px; height: 2px; background: #6366f1; }
+  .print-section-title { font-size: 24pt; font-weight: 800; color: #0f172a; margin-bottom: 30px; }
+
+  .print-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+  
+  .print-insight-box { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 24px; border-radius: 0 12px 12px 0; margin-bottom: 30px; }
+  .print-insight-title { font-size: 12pt; font-weight: 800; color: #b45309; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .print-insight-text { font-size: 12pt; color: #451a03; line-height: 1.6; }
+
+  .print-priority-item { display: flex; gap: 20px; align-items: center; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 16px; background: #ffffff; }
+  .print-priority-num { width: 56px; height: 56px; background: #fee2e2; color: #ef4444; font-size: 18pt; font-weight: 800; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .print-priority-title { font-size: 16pt; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+  .print-priority-desc { font-size: 11pt; color: #64748b; }
+  .print-priority-score { font-size: 20pt; font-weight: 800; color: #ef4444; margin-left: auto; }
+
+  .print-recommendation { border-left: 4px solid #6366f1; padding-left: 24px; margin-bottom: 30px; }
+  .print-recommendation-title { font-size: 16pt; font-weight: 800; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; }
+  .print-recommendation-score { color: #f59e0b; }
+  .print-recommendation-text { font-size: 12pt; color: #334155; line-height: 1.6; }
+
+  .print-bar-row { margin-bottom: 24px; padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px; }
+  .print-bar-header { display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center; }
+  .print-bar-title { font-weight: 800; font-size: 14pt; color: #0f172a; display: flex; align-items: center; gap: 12px; }
+  .print-bar-score { font-size: 16pt; font-weight: 800; color: #0f172a; }
+  .print-bar-bg { height: 12px; background: #f1f5f9; border-radius: 6px; overflow: hidden; width: 100%; }
+  .print-bar-fill { height: 100%; border-radius: 6px; }
+  
+  .print-cta-card { background: #0f172a; color: white; padding: 40px; border-radius: 20px; margin-top: auto; }
+  .print-cta-title { font-size: 20pt; font-weight: 800; margin-bottom: 16px; }
+  .print-cta-text { font-size: 12pt; color: #94a3b8; line-height: 1.5; margin-bottom: 40px; }
+  .print-cta-footer { display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; font-weight: 600; color: #e2e8f0; }
+
+  canvas { max-width: 100%; height: auto !important; }
+}
 </style>
 </head>
 <body>
@@ -1166,8 +1253,8 @@ canvas#radarCanvas {
         <div id="dimensionsContainer"></div>
 
         <div class="actions-bar">
-          <button class="btn btn-danger" onclick="resetForm()" id="btnReset">
-            <span>↺</span> Resetar Tudo
+          <button class="btn btn-primary" onclick="avaliarResultados()" id="btnAction">
+            <span>🚀</span> Avaliar Resultados
           </button>
           <button class="btn btn-secondary" onclick="toggleBenchmark()" id="btnBenchmark">
             <span>📊</span> Benchmark
@@ -1245,22 +1332,18 @@ canvas#radarCanvas {
       
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
         <div>
-          <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-dim); font-size: 0.9rem;">Nome completo *</label>
-          <input type="text" id="leadNome" placeholder="Seu nome" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; outline: none;">
+          <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-dim); font-size: 0.9rem;">Empresa *</label>
+          <input type="text" id="leadNome" placeholder="Sua empresa" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; outline: none;">
         </div>
         <div>
           <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-dim); font-size: 0.9rem;">E-mail *</label>
           <input type="email" id="leadEmail" placeholder="seu@email.com" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; outline: none;">
         </div>
         <div style="grid-column: 1 / -1;">
-          <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-dim); font-size: 0.9rem;">CNPJ (Opcional)</label>
+          <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-dim); font-size: 0.9rem;">CNPJ *</label>
           <input type="text" id="leadCnpj" placeholder="00.000.000/0000-00" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; outline: none;">
         </div>
       </div>
-      
-      <button class="btn btn-primary" onclick="enviarParaPlanilha()" id="btnEnviarPlanilha" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-        <span>🚀</span> Acesso ao Resultado
-      </button>
     </div>
 
     <div class="card">
@@ -1275,7 +1358,7 @@ canvas#radarCanvas {
         <button class="btn btn-secondary" onclick="copyReport()" id="btnCopy">
           <span>📋</span> Copiar
         </button>
-        <button class="btn btn-secondary" disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;" id="btnPrint" onclick="window.print()">
+        <button class="btn btn-secondary" disabled style="opacity: 0.5; cursor: not-allowed; pointer-events: none;" id="btnPrint" onclick="printPDF()">
           <span>🖨️</span> Imprimir / PDF
         </button>
       </div>
@@ -2255,14 +2338,16 @@ function showToast(message, type) {
   }, 5000);
 }
 
-function enviarParaPlanilha() {
+window.aiInsights = null;
+
+function avaliarResultados() {
   const nome = document.getElementById('leadNome').value.trim();
   const email = document.getElementById('leadEmail').value.trim();
   const cnpj = document.getElementById('leadCnpj').value.trim();
-  const btn = document.getElementById('btnEnviarPlanilha');
+  const btn = document.getElementById('btnAction');
 
-  if (!nome || !email) {
-    showToast('Por favor, preencha Nome e E-mail.', 'error');
+  if (!nome || !email || !cnpj) {
+    showToast('Por favor, preencha Empresa, E-mail e CNPJ.', 'error');
     return;
   }
 
@@ -2278,7 +2363,7 @@ function enviarParaPlanilha() {
     return;
   }
 
-  btn.innerHTML = '<span>⏳</span> Enviando...';
+  btn.innerHTML = '<span>⏳</span> Processando...';
   btn.style.opacity = '0.7';
   btn.style.pointerEvents = 'none';
 
@@ -2294,7 +2379,6 @@ function enviarParaPlanilha() {
   const scoreGeralRaw = ((dimensions.map(d => getDimAvg(d.id)).reduce((a, b) => a + b, 0) / dimensions.length - 1) / 3 * 100);
   const scoreGeral = (isFinite(scoreGeralRaw) ? scoreGeralRaw : 0).toFixed(1) + '%';
 
-  // Constrói payload na ordem exata das colunas da planilha
   const payloadEntries = [
     ['Data', new Date().toLocaleString('pt-BR')],
     ['Nome', nome],
@@ -2314,45 +2398,350 @@ function enviarParaPlanilha() {
 
   const urlParams = new URLSearchParams();
   payloadEntries.forEach(([key, value]) => urlParams.append(key, value));
-  // Envia a ordem exata dos cabeçalhos para o Apps Script montar a planilha corretamente
   urlParams.append('_headers', payloadEntries.map(([key]) => key).join('|'));
   const body = urlParams.toString();
 
-  console.log('[enviarParaPlanilha] Payload:', body);
-  console.log('[enviarParaPlanilha] Entries:', payloadEntries);
-  console.log('[enviarParaPlanilha] Headers order:', payloadEntries.map(([key]) => key));
-
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywpRJcCKymRUjqRXEz-Mm8lkJN-RPE84eCEQOBtC47JbjTs8geNbSLz3wESWk5LOFqvg/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyfRQ9rNgraLL42INLa9CfLfVWGu73tKEqxXymp1uF5NTlFVrsX97e2L1n7-uaM_KDyXw/exec';
 
   fetch(SCRIPT_URL, {
     method: 'POST',
-    mode: 'no-cors',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     },
     body: body
-  }).then(() => {
-    showToast('Dados enviados com sucesso!', 'success');
-    
-    const btnPrint = document.getElementById('btnPrint');
-    if (btnPrint) {
-      btnPrint.removeAttribute('disabled');
-      btnPrint.className = 'btn btn-primary';
-      btnPrint.style.opacity = '1';
-      btnPrint.style.cursor = 'pointer';
-      btnPrint.style.pointerEvents = 'auto';
-    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      showToast('Resultados avaliados com sucesso!', 'success');
+      
+      // Salva os insights para uso no PDF
+      if (data.aiInsights) {
+        window.aiInsights = data.aiInsights;
+        console.log("AI Insights:", window.aiInsights);
+        // TODO: Popular o HTML oculto de impressão com os dados da IA
+        renderPrintLayout();
+      }
 
-    btn.innerHTML = '<span>✅</span> Enviado';
+      // Habilita o botão Imprimir / PDF
+      const btnPrint = document.getElementById('btnPrint');
+      if (btnPrint) {
+        btnPrint.removeAttribute('disabled');
+        btnPrint.className = 'btn btn-primary';
+        btnPrint.style.opacity = '1';
+        btnPrint.style.cursor = 'pointer';
+        btnPrint.style.pointerEvents = 'auto';
+      }
+
+      // Volta o botão de Ação para o estado "Resetar Tudo"
+      btn.innerHTML = '<span>↺</span> Resetar Tudo';
+      btn.className = 'btn btn-danger';
+      btn.onclick = resetForm;
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = 'auto';
+    } else {
+      throw new Error(data.error || 'Erro desconhecido');
+    }
   }).catch(err => {
     console.error('Erro ao enviar:', err);
-    showToast('Ocorreu um erro ao enviar. Tente novamente.', 'error');
-    btn.innerHTML = '<span>🚀</span> Acesso ao Resultado';
+    showToast('Ocorreu um erro ao processar. Tente novamente.', 'error');
+    btn.innerHTML = '<span>🚀</span> Avaliar Resultados';
     btn.style.opacity = '1';
     btn.style.pointerEvents = 'auto';
   });
 }
+
+function renderPrintLayout() {
+  const container = document.getElementById('printContainer');
+  const nomeEmpresa = document.getElementById('leadNome').value.trim() || 'Sua Empresa';
+  const email = document.getElementById('leadEmail').value.trim() || 'email@empresa.com';
+  const cnpj = document.getElementById('leadCnpj').value.trim() || '00.000.000/0000-00';
+  const data = new Date();
+  const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+  const mesAno = `${meses[data.getMonth()]} de ${data.getFullYear()}`;
+  
+  const scoreBadge = document.getElementById('scoreBadge').textContent.trim();
+  const scoreTitle = document.getElementById('totalScore').textContent.trim();
+  const ai = window.aiInsights || {};
+  
+  const ringCanvas = document.getElementById('scoreRing');
+  let donutImg = '';
+  if (ringCanvas) donutImg = `<img src="${ringCanvas.toDataURL()}" style="max-width: 200px;">`;
+  
+  const radarCanvas = document.getElementById('radarChart');
+  let radarImg = '';
+  if (radarCanvas) radarImg = `<img src="${radarCanvas.toDataURL()}" style="width: 100%; max-width: 600px; margin: 0 auto; display: block;">`;
+
+  let html = '';
+  
+  // PAGE 1: COVER
+  html += `
+  <div class="print-page">
+    <div class="print-header">
+      <div class="print-logo">INOVARE</div>
+      <div class="print-header-text">DIAGNÓSTICO<br>EMPRESARIAL</div>
+    </div>
+    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+      <div class="print-badge">Score de Maturidade Financeira</div>
+      <div class="print-title">Devolutiva do<br>Diagnóstico Financeiro</div>
+      <div class="print-subtitle">
+        Uma leitura estruturada da saúde financeira da sua empresa em 6<br>
+        dimensões estratégicas, com prioridades de atuação e<br>
+        recomendações práticas.<br><br>
+        Guarde este diagnóstico como ponto de partida da sua jornada de gestão.<br>
+        Concentre seus esforços no desenvolvimento das áreas apontadas como<br>
+        críticas e, à medida que avançar, retorne para refazer a avaliação.
+      </div>
+    </div>
+    <div class="print-footer-grid">
+      <div>
+        <div class="print-meta-label">PREPARADO PARA</div>
+        <div class="print-meta-value">${nomeEmpresa}</div>
+      </div>
+      <div>
+        <div class="print-meta-label">E-MAIL</div>
+        <div class="print-meta-value">${email}</div>
+      </div>
+      <div>
+        <div class="print-meta-label">CNPJ</div>
+        <div class="print-meta-value">${cnpj}</div>
+      </div>
+      <div>
+        <div class="print-meta-label">EMITIDO EM</div>
+        <div class="print-meta-value">${mesAno}</div>
+      </div>
+    </div>
+  </div>`;
+  
+  // PAGE 2: SCORE OVERVIEW
+  html += `
+  <div class="print-page">
+    <div class="print-section-badge">VISÃO GERAL</div>
+    <div class="print-section-title">Score de Maturidade</div>
+    
+    <div class="print-card print-flex-row" style="margin-bottom: 40px;">
+      <div style="position: relative; width: 200px; height: 200px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <div style="position: absolute; inset: 0; display:flex; align-items:center; justify-content:center;">${donutImg}</div>
+        <div style="text-align: center; position: relative; z-index: 10;">
+          <div class="print-score-huge">${scoreTitle}</div>
+          <div class="print-score-denom">/100</div>
+        </div>
+      </div>
+      <div style="flex: 1;">
+        <div style="display: inline-flex; align-items: center; background: #fef3c7; color: #b45309; padding: 6px 16px; border-radius: 20px; font-weight: 700; margin-bottom: 20px; gap: 8px;">
+           Nível ${scoreBadge}
+        </div>
+        <div style="font-size: 14pt; color: #334155; line-height: 1.6;">
+          ${ai.executiveSummary || 'A empresa apresenta fundamentos que precisam ser observados com atenção para garantir crescimento sustentável.'}
+        </div>
+      </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+      <div class="print-card" style="text-align: center;">
+        <div style="font-size: 32pt; font-weight: 800; color: #6366f1;">6</div>
+        <div style="font-size: 10pt; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">DIMENSÕES</div>
+      </div>
+      <div class="print-card" style="text-align: center;">
+        <div style="font-size: 32pt; font-weight: 800; color: #6366f1;">49</div>
+        <div style="font-size: 10pt; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">INDICADORES</div>
+      </div>
+      <div class="print-card" style="text-align: center;">
+        <div style="font-size: 32pt; font-weight: 800; color: #6366f1;">4</div>
+        <div style="font-size: 10pt; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">NÍVEIS</div>
+      </div>
+    </div>
+    
+    <div class="print-card" style="background: #f8fafc; border: none; margin-top: auto;">
+      <div style="font-size: 11pt; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">COMO LER ESTE RELATÓRIO</div>
+      <div style="font-size: 12pt; color: #475569; line-height: 1.6;">
+        As próximas páginas detalham a nota de cada dimensão (de 1 a 4), o equilíbrio entre elas no radar de maturidade, os principais insights do diagnóstico e um plano de ação com recomendações práticas — começando pelas áreas mais críticas.
+      </div>
+    </div>
+  </div>`;
+  
+  // PAGE 3: NOTAS POR DIMENSÃO
+  html += `
+  <div class="print-page">
+    <div class="print-section-badge">DETALHAMENTO</div>
+    <div class="print-section-title">Notas por dimensão</div>
+    <div style="font-size: 12pt; color: #64748b; margin-bottom: 40px;">Cada dimensão é avaliada de 1 (inicial) a 4 (avançado).</div>
+  `;
+  
+  const dimNamesMap = { controles: 'Controles Financeiros', capital: 'Capital de Giro', projecoes: 'Projeções Financeiras', custos: 'Custos e Preço', resultados: 'Controle de Resultados', indicadores: 'Indicadores' };
+  dimensions.forEach(dim => {
+    const avg = getDimAvg(dim.id);
+    const scoreInfo = getNivelInfo(((avg - 1) / 3) * 100);
+    const pct = ((avg - 1) / 3) * 100;
+    
+    html += `
+    <div class="print-bar-row">
+      <div class="print-bar-header">
+        <div class="print-bar-title">
+          <div style="width: 12px; height: 12px; border-radius: 50%; background: ${scoreInfo.color};"></div>
+          ${dimNamesMap[dim.id] || dim.id}
+        </div>
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="font-size: 10pt; font-weight: 700; color: #b45309; background: #fef3c7; padding: 4px 12px; border-radius: 12px;">${scoreInfo.nivel}</div>
+          <div class="print-bar-score">${avg.toFixed(1)}<span style="font-size: 12pt; color: #94a3b8;">/4</span></div>
+        </div>
+      </div>
+      <div class="print-bar-bg">
+        <div class="print-bar-fill" style="width: ${pct}%; background: ${scoreInfo.color};"></div>
+      </div>
+    </div>`;
+  });
+  
+  html += `</div>`;
+  
+  // PAGE 4: RADAR
+  html += `
+  <div class="print-page">
+    <div class="print-section-badge">RADAR DE MATURIDADE</div>
+    <div class="print-section-title">Equilíbrio entre as dimensões</div>
+    <div style="font-size: 12pt; color: #64748b; margin-bottom: 40px;">A área preenchida mostra o quanto cada frente está desenvolvida. Quanto mais próximo da borda, mais madura a dimensão.</div>
+    <div class="print-card" style="display: flex; justify-content: center; align-items: center; padding: 40px;">
+      ${radarImg}
+    </div>
+  </div>`;
+  
+  // PAGE 5: INSIGHTS E PRIORIDADES
+  let prioritiesHtml = '';
+  if (ai.priorities && Array.isArray(ai.priorities)) {
+    ai.priorities.forEach((p, idx) => {
+      prioritiesHtml += `
+      <div class="print-priority-item">
+        <div class="print-priority-num">${idx + 1}º</div>
+        <div class="print-priority-content">
+          <div class="print-priority-title">${p.dimension}</div>
+          <div class="print-priority-desc">${p.reason}</div>
+        </div>
+      </div>`;
+    });
+  } else {
+    prioritiesHtml = '<div style="color: #64748b; font-size: 12pt;">Nenhuma prioridade específica identificada.</div>';
+  }
+  
+  html += `
+  <div class="print-page">
+    <div class="print-section-badge">LEITURA DO DIAGNÓSTICO</div>
+    <div class="print-section-title">Insights e prioridades</div>
+    
+    <div class="print-insight-box">
+      <div class="print-insight-title">MATURIDADE ${scoreBadge.toUpperCase()}</div>
+      <div class="print-insight-text">
+        ${ai.executiveSummary || 'A empresa apresenta uma base de gestão, mas requer atenção em áreas críticas para assegurar estabilidade e possibilitar crescimento escalável.'}
+      </div>
+    </div>
+    
+    <div style="font-size: 11pt; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px;">PRIORIDADE DE ATUAÇÃO SUGERIDA</div>
+    ${prioritiesHtml}
+  </div>`;
+  
+  // PAGE 6 & 7: RECOMENDAÇÕES POR DIMENSÃO
+  const recs = ai.recommendations || {};
+  const dimKeys = dimensions.map(d => d.id);
+  
+  const buildRec = (dimId) => {
+    const avg = getDimAvg(dimId);
+    const scoreInfo = getNivelInfo(((avg - 1) / 3) * 100);
+    return `
+    <div class="print-recommendation" style="border-left-color: ${scoreInfo.color};">
+      <div class="print-recommendation-title">
+        ${dimNamesMap[dimId]} <span style="color: ${scoreInfo.color};">· ${avg.toFixed(1)}</span>
+      </div>
+      <div class="print-recommendation-text">
+        ${recs[dimId] || 'Recomendamos iniciar a coleta sistemática de dados nesta frente para obter maior visibilidade e controle.'}
+      </div>
+    </div>`;
+  };
+  
+  html += `
+  <div class="print-page">
+    <div class="print-section-badge">PLANO DE AÇÃO</div>
+    <div class="print-section-title">Recomendações por dimensão</div>
+    <div style="font-size: 12pt; color: #64748b; margin-bottom: 40px;">Orientações práticas para evoluir cada frente ao próximo nível de maturidade.</div>
+    
+    ${buildRec(dimKeys[0])}
+    ${buildRec(dimKeys[1])}
+    ${buildRec(dimKeys[2])}
+  </div>
+  
+  <div class="print-page">
+    <div style="height: 60px;"></div>
+    ${buildRec(dimKeys[3])}
+    ${buildRec(dimKeys[4])}
+    ${buildRec(dimKeys[5])}
+  </div>`;
+  
+  // PAGE 8: PROXIMOS PASSOS E CTA
+  html += `
+  <div class="print-page">
+    <div class="print-section-badge">PRÓXIMOS PASSOS</div>
+    <div class="print-section-title">Do diagnóstico ao resultado</div>
+    <div style="font-size: 14pt; color: #475569; margin-bottom: 40px; line-height: 1.6;">
+      Este diagnóstico é o ponto de partida. A INOVARE traduz cada prioridade em um plano de implementação com metas, responsáveis e acompanhamento — para que o score de maturidade evolua de forma consistente.
+    </div>
+    
+    <div class="print-priority-item" style="margin-bottom: 24px;">
+      <div class="print-priority-num" style="background: transparent; color: #6366f1;">01</div>
+      <div class="print-priority-content">
+        <div class="print-priority-title">Sessão de devolutiva</div>
+        <div class="print-priority-desc">Apresentação dos resultados, esclarecimento de dúvidas e alinhamento de objetivos.</div>
+      </div>
+    </div>
+    <div class="print-priority-item" style="margin-bottom: 24px;">
+      <div class="print-priority-num" style="background: transparent; color: #6366f1;">02</div>
+      <div class="print-priority-content">
+        <div class="print-priority-title">Plano de ação</div>
+        <div class="print-priority-desc">Roadmap por prioridade com metas, responsáveis e prazos definidos.</div>
+      </div>
+    </div>
+    <div class="print-priority-item" style="margin-bottom: 24px;">
+      <div class="print-priority-num" style="background: transparent; color: #6366f1;">03</div>
+      <div class="print-priority-content">
+        <div class="print-priority-title">Acompanhamento e reavaliação</div>
+        <div class="print-priority-desc">Revisões periódicas e novo diagnóstico para medir a evolução do score.</div>
+      </div>
+    </div>
+    
+    <div class="print-cta-card">
+      <div class="print-cta-title">Vamos construir o próximo nível da sua gestão?</div>
+      <div class="print-cta-text">Fale com a INOVARE para transformar este diagnóstico em um plano de ação sob medida.</div>
+      <div class="print-cta-footer">
+        <div>
+          <div style="font-size: 16pt; font-weight: 800; color: white;">INOVARE</div>
+          <div style="font-size: 10pt; color: #94a3b8; font-weight: 500; letter-spacing: 1px;">GESTÃO ESTRATÉGICA INTEGRADA</div>
+        </div>
+        <div style="text-align: right; color: #c7d2fe;">
+          <div>contato@inovarege.com.br</div>
+          <div>inovarege.com.br</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  
+  container.innerHTML = html;
+}
+
+function printPDF() {
+  const nomeEmpresa = document.getElementById('leadNome').value.trim() || 'Empresa';
+  
+  const data = new Date();
+  const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+  const mesAno = `${meses[data.getMonth()]} de ${data.getFullYear()}`;
+
+  const originalTitle = document.title;
+  document.title = `Diagnóstico INOVARE - ${nomeEmpresa} - ${mesAno}`;
+  
+  window.print();
+  
+  setTimeout(() => {
+    document.title = originalTitle;
+  }, 1000);
+}
 </script>
+<div id="printContainer" class="print-only"></div>
 <div id="toast" class="toast"></div>
 </body>
 </html>

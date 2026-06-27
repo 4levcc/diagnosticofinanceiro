@@ -1,44 +1,32 @@
 /**
  * Google Apps Script para receber os dados do Diagnóstico INOVARE
- * e gravar na planilha vinculada.
- *
- * Como usar:
- * 1. Acesse a planilha que será o banco de dados.
- * 2. Vá em Extensões > Apps Script.
- * 3. Cole este código no editor e salve (Ctrl+S / Cmd+S).
- * 4. Clique em "Implantar" > "Novo implantação" > tipo "Web app".
- * 5. Em "Executar como" escolha "Eu" e em "Quem pode acessar" escolha "Qualquer pessoa".
- * 6. Copie a URL gerada e cole no front-end na constante SCRIPT_URL.
+ * e gravar na planilha vinculada, além de chamar a API do Gemini.
  */
 
-// Se o script NÃO foi criado a partir da planilha (scripts.google.com),
-// descomente a linha abaixo e insira o ID da planilha:
-// const SPREADSHEET_ID = 'COLE_AQUI_O_ID_DA_PLANILHA';
+// Chave da API do Google Gemini
+const GEMINI_API_KEY = 'AIzaSyBRZ5uVUMhgnmIuPl5P6EhDwivJhexS6e4';
+
+// ATENÇÃO: Se este script não foi criado por dentro de uma planilha (Extensões > Apps Script),
+// você PRECISA colocar o ID da sua planilha abaixo. O ID fica na URL da planilha:
+// https://docs.google.com/spreadsheets/d/AQUI_FICA_O_ID/edit
+const SPREADSHEET_ID = '1YDUnC-jqlBaB1LZrvs_2VwRvL8BGxSBFlFpnAi9o670';
 
 function doPost(e) {
   try {
     const ss = getSpreadsheet();
-
-    // Renomeia a primeira aba para "leads" se ainda não estiver
     let sheet = ss.getSheets()[0];
     if (sheet.getName() !== 'leads') {
       sheet.setName('leads');
     }
 
-    // Remove a aba "Respostas" se existir
     const respostasSheet = ss.getSheetByName('Respostas');
     if (respostasSheet) {
       ss.deleteSheet(respostasSheet);
     }
 
-    // e.parameter contém os dados quando Content-Type é application/x-www-form-urlencoded
     const params = e.parameter || {};
-
-    // Log para depuração (Visualização > Logs do Apps Script)
     console.log('Parâmetros recebidos:', JSON.stringify(params));
 
-    // A ordem dos cabeçalhos vem do front-end no parâmetro _headers
-    // (ex: "Data|Nome|Email|CNPJ|Score Geral|[Controles] Pergunta 1|...")
     let orderedHeaders = [];
     if (params._headers) {
       orderedHeaders = String(params._headers)
@@ -47,15 +35,11 @@ function doPost(e) {
         .filter(function(h) { return h && h !== '_headers'; });
     }
 
-    // Lê os cabeçalhos atuais da planilha
     let currentHeaders = [];
     if (sheet.getLastRow() > 0) {
       currentHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
     }
 
-    // Determina o cabeçalho final:
-    // 1. Usa a ordem enviada pelo front-end (_headers)
-    // 2. Preserva no final quaisquer colunas extras que já existam na planilha
     let finalHeaders = orderedHeaders.length > 0 ? orderedHeaders.slice() : currentHeaders.slice();
     currentHeaders.forEach(function(h) {
       const trimmed = String(h).trim();
@@ -64,29 +48,39 @@ function doPost(e) {
       }
     });
 
-    // Se ainda não houver cabeçalhos, usa o padrão básico
     if (finalHeaders.length === 0) {
       finalHeaders = buildDefaultHeaders();
     }
 
-    // Atualiza a linha de cabeçalhos na planilha
     if (finalHeaders.length > sheet.getLastColumn()) {
       sheet.getRange(1, 1, 1, finalHeaders.length).setValues([finalHeaders]);
     } else {
       sheet.getRange(1, 1, 1, finalHeaders.length).setValues([finalHeaders]);
     }
 
-    // Monta a linha de respostas na ordem exata dos cabeçalhos
     const row = finalHeaders.map(function(header) {
       const key = String(header).trim();
       return params.hasOwnProperty(key) ? params[key] : '';
     });
 
-    // Insere a linha de respostas
     sheet.appendRow(row);
 
+    // ==========================================
+    // CHAMADA À API DO GEMINI PARA INSIGHTS
+    // ==========================================
+    let aiInsights = null;
+    try {
+      aiInsights = generateGeminiInsights(params);
+    } catch (aiErr) {
+      console.error('Erro ao gerar insights com IA:', aiErr);
+    }
+
     return ContentService
-      .createTextOutput(JSON.stringify({ success: true, message: 'Dados gravados' }))
+      .createTextOutput(JSON.stringify({ 
+        success: true, 
+        message: 'Dados gravados com sucesso',
+        aiInsights: aiInsights
+      }))
       .setMimeType(ContentService.MimeType.JSON);
 
   } catch (err) {
@@ -95,6 +89,83 @@ function doPost(e) {
       .createTextOutput(JSON.stringify({ success: false, error: err.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+function generateGeminiInsights(params) {
+  // Extrai as pontuações do objeto params para montar o prompt
+  const scores = {
+    geral: params['Score Geral'] || 'N/A',
+    controles: params['Score Controles'] || 'N/A',
+    capital: params['Score Capital'] || 'N/A',
+    projecoes: params['Score Projeções'] || 'N/A',
+    custos: params['Score Custos'] || 'N/A',
+    resultados: params['Score Resultados'] || 'N/A',
+    indicadores: params['Score Indicadores'] || 'N/A'
+  };
+
+  const prompt = `
+Você é um consultor financeiro sênior da INOVARE Consultoria Empresarial, especialista em PMEs.
+Analise os resultados do diagnóstico financeiro de uma empresa e forneça recomendações práticas e diretas.
+
+A empresa obteve as seguintes pontuações (de 0 a 100%):
+- Score Geral: ${scores.geral}
+- Controles Financeiros: ${scores.controles}
+- Capital de Giro: ${scores.capital}
+- Projeções Financeiras: ${scores.projecoes}
+- Custos e Preço: ${scores.custos}
+- Controle de Resultados: ${scores.resultados}
+- Indicadores: ${scores.indicadores}
+
+Retorne um objeto JSON contendo exatamente as seguintes chaves (escreva em português brasileiro profissional e motivador, sendo conciso):
+{
+  "executiveSummary": "Um resumo de 2 a 3 frases sobre o momento da empresa e o principal gap que a impede de crescer, sem usar jargões excessivos.",
+  "priorities": [
+    { "dimension": "Nome da dimensão mais crítica (menor nota)", "reason": "Por que esta é a prioridade 1 (1 frase)" },
+    { "dimension": "Nome da segunda dimensão mais crítica", "reason": "Por que esta é a prioridade 2 (1 frase)" },
+    { "dimension": "Nome da terceira dimensão mais crítica", "reason": "Por que esta é a prioridade 3 (1 frase)" }
+  ],
+  "recommendations": {
+    "controles": "Um parágrafo curto de recomendação prática para melhorar Controles Financeiros com base na nota.",
+    "capital": "Um parágrafo curto de recomendação prática para melhorar Capital de Giro.",
+    "projecoes": "Um parágrafo curto de recomendação prática para melhorar Projeções Financeiras.",
+    "custos": "Um parágrafo curto de recomendação prática para melhorar Custos e Preço.",
+    "resultados": "Um parágrafo curto de recomendação prática para melhorar Controle de Resultados.",
+    "indicadores": "Um parágrafo curto de recomendação prática para melhorar Indicadores."
+  }
+}
+Não inclua crases no formato JSON, retorne apenas o objeto JSON válido.
+`;
+
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + GEMINI_API_KEY;
+  const payload = {
+    "contents": [{
+      "parts": [{"text": prompt}]
+    }],
+    "generationConfig": {
+      "response_mime_type": "application/json"
+    }
+  };
+
+  const options = {
+    "method": "post",
+    "contentType": "application/json",
+    "payload": JSON.stringify(payload),
+    "muteHttpExceptions": true
+  };
+
+  const response = UrlFetchApp.fetch(url, options);
+  const responseCode = response.getResponseCode();
+  
+  if (responseCode === 200) {
+    const json = JSON.parse(response.getContentText());
+    if (json.candidates && json.candidates.length > 0) {
+      const text = json.candidates[0].content.parts[0].text;
+      return JSON.parse(text); // O retorno deve ser um JSON devido ao response_mime_type
+    }
+  } else {
+    console.error('Erro na API do Gemini:', response.getContentText());
+  }
+  return null;
 }
 
 function doGet(e) {
@@ -113,3 +184,4 @@ function getSpreadsheet() {
 function buildDefaultHeaders() {
   return ['Data', 'Nome', 'Email', 'CNPJ', 'Score Geral'];
 }
+
