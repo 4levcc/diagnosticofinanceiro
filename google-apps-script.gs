@@ -69,17 +69,20 @@ function doPost(e) {
     // CHAMADA À API DO GEMINI PARA INSIGHTS
     // ==========================================
     let aiInsights = null;
+    let aiError = null;
     try {
       aiInsights = generateGeminiInsights(params);
     } catch (aiErr) {
       console.error('Erro ao gerar insights com IA:', aiErr);
+      aiError = aiErr.toString();
     }
 
     return ContentService
-      .createTextOutput(JSON.stringify({ 
-        success: true, 
+      .createTextOutput(JSON.stringify({
+        success: true,
         message: 'Dados gravados com sucesso',
-        aiInsights: aiInsights
+        aiInsights: aiInsights,
+        aiError: aiError
       }))
       .setMimeType(ContentService.MimeType.JSON);
 
@@ -136,7 +139,7 @@ Retorne um objeto JSON contendo exatamente as seguintes chaves (escreva em portu
 Não inclua crases no formato JSON, retorne apenas o objeto JSON válido.
 `;
 
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + GEMINI_API_KEY;
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + GEMINI_API_KEY;
   const payload = {
     "contents": [{
       "parts": [{"text": prompt}]
@@ -162,10 +165,11 @@ Não inclua crases no formato JSON, retorne apenas o objeto JSON válido.
       const text = json.candidates[0].content.parts[0].text;
       return JSON.parse(text); // O retorno deve ser um JSON devido ao response_mime_type
     }
+    throw new Error('Resposta do Gemini sem candidates: ' + response.getContentText());
   } else {
     console.error('Erro na API do Gemini:', response.getContentText());
+    throw new Error('Gemini retornou HTTP ' + responseCode + ': ' + response.getContentText());
   }
-  return null;
 }
 
 function doGet(e) {

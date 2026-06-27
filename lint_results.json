@@ -1,0 +1,38 @@
+[
+  {
+    "severity": "error",
+    "message": "The value of the \"id\" attribute is duplicated",
+    "line": 2750,
+    "col": 6,
+    "raw": "id=\"toast\"",
+    "ruleId": "id-duplication",
+    "filePath": "/Users/alexandrevecchietti/Antigravity/INOVARE/Diagnostico/index.html"
+  },
+  {
+    "severity": "warning",
+    "message": "The \"label\" element should associate with a control",
+    "line": 1315,
+    "col": 11,
+    "raw": "<label style=\"display: block; margin-bottom: 0.5rem; color: var(--color-text-dim); font-size: 0.9rem;\">",
+    "ruleId": "label-has-control",
+    "filePath": "/Users/alexandrevecchietti/Antigravity/INOVARE/Diagnostico/index.html"
+  },
+  {
+    "severity": "warning",
+    "message": "The \"label\" element should associate with a control",
+    "line": 1319,
+    "col": 11,
+    "raw": "<label style=\"display: block; margin-bottom: 0.5rem; color: var(--color-text-dim); font-size: 0.9rem;\">",
+    "ruleId": "label-has-control",
+    "filePath": "/Users/alexandrevecchietti/Antigravity/INOVARE/Diagnostico/index.html"
+  },
+  {
+    "severity": "warning",
+    "message": "The \"label\" element should associate with a control",
+    "line": 1323,
+    "col": 11,
+    "raw": "<label style=\"display: block; margin-bottom: 0.5rem; color: var(--color-text-dim); font-size: 0.9rem;\">",
+    "ruleId": "label-has-control",
+    "filePath": "/Users/alexandrevecchietti/Antigravity/INOVARE/Diagnostico/index.html"
+  }
+]
