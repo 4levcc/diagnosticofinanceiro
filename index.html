@@ -824,6 +824,20 @@ canvas#radarCanvas {
   color: var(--color-text);
   border-color: var(--color-border-hover);
 }
+.btn-copy-lit {
+  color: #F2BC0D !important;
+}
+.btn-specialist {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+}
+.btn-specialist:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(37, 99, 235, 0.45);
+  color: #ffffff;
+}
 .btn-danger {
   background: rgba(239, 68, 68, 0.12);
   color: #f87171;
@@ -1369,7 +1383,7 @@ canvas#radarCanvas {
         </div>
       </div>
       <div class="actions-bar lead-actions">
-        <button class="btn btn-primary btn-center" onclick="avaliarResultados()" id="btnAction">
+        <button class="btn btn-secondary btn-center btn-disabled" onclick="avaliarResultados()" id="btnAction">
           <span>🚀</span> Avaliar Resultados
         </button>
         <button class="btn btn-secondary btn-center" onclick="toggleBenchmark()" id="btnBenchmark">
@@ -1383,6 +1397,33 @@ canvas#radarCanvas {
   </div>
 
   <!-- ========================================
+       EXPORT
+       ======================================== -->
+  <div class="export-section">
+    <div class="card">
+      <div class="card-title">
+        <span class="emoji">📤</span>
+        Exportar Resultado
+      </div>
+      <div class="export-btns">
+        <button class="btn btn-secondary" onclick="generateReport()" id="btnReport">
+          <span>📄</span> Gerar Relatório TXT
+        </button>
+        <button class="btn btn-secondary" onclick="copyReport()" id="btnCopy">
+          <span>📋</span> Copiar
+        </button>
+        <button class="btn btn-secondary btn-disabled" id="btnPrint" onclick="printPDF()">
+          <span>🖨️</span> Imprimir / PDF
+        </button>
+        <a class="btn btn-specialist" id="btnSpecialist" href="https://calendar.app.google/Mtgyd7A2AxJfviXN8" target="_blank" rel="noopener" style="display: none;">
+          <span>💬</span> Conversar com um especialista
+        </a>
+      </div>
+      <div class="export-area" id="exportArea"></div>
+    </div>
+  </div>
+
+  <!-- ========================================
        INSIGHTS
        ======================================== -->
   <div class="insights-section">
@@ -1392,32 +1433,6 @@ canvas#radarCanvas {
         Insights Automáticos
       </div>
       <div id="insightsContainer"></div>
-    </div>
-  </div>
-
-  <!-- ========================================
-       LEAD CAPTURE E EXPORT
-       ======================================== -->
-  <div class="export-section">
-
-
-    <div class="card">
-      <div class="card-title">
-        <span class="emoji">📤</span>
-        Exportar Resultado
-      </div>
-      <div class="export-btns">
-        <button class="btn btn-primary" onclick="generateReport()" id="btnReport">
-          <span>📄</span> Gerar Relatório TXT
-        </button>
-        <button class="btn btn-secondary" onclick="copyReport()" id="btnCopy">
-          <span>📋</span> Copiar
-        </button>
-        <button class="btn btn-secondary btn-disabled" id="btnPrint" onclick="printPDF()">
-          <span>🖨️</span> Imprimir / PDF
-        </button>
-      </div>
-      <div class="export-area" id="exportArea"></div>
     </div>
   </div>
 </div>
@@ -1807,6 +1822,13 @@ function updateCompletion() {
   const pct = total > 0 ? (changed / total) * 100 : 0;
   document.getElementById('completionFill').style.width = pct + '%';
   document.getElementById('completionPct').textContent = Math.round(pct) + '%';
+
+  // Diagnóstico 100%: Gerar Relatório TXT fica amarelo e Copiar acende a cor da letra
+  const isComplete = pct >= 100;
+  const btnReport = document.getElementById('btnReport');
+  if (btnReport) btnReport.className = isComplete ? 'btn btn-primary' : 'btn btn-secondary';
+  const btnCopy = document.getElementById('btnCopy');
+  if (btnCopy) btnCopy.classList.toggle('btn-copy-lit', isComplete);
 }
 
 function updateDimSummary(dimScores) {
@@ -2196,6 +2218,7 @@ function resetForm() {
   const btnBenchmark = document.getElementById('btnBenchmark');
   if (btnBenchmark) {
     btnBenchmark.innerHTML = '<span>📊</span> Benchmark';
+    btnBenchmark.className = 'btn btn-secondary btn-center';
   }
 
   updateAll();
@@ -2215,6 +2238,12 @@ function resetForm() {
     btnPrint.style.cursor = 'not-allowed';
     btnPrint.style.pointerEvents = 'none';
   }
+
+  const btnSpecialist = document.getElementById('btnSpecialist');
+  if (btnSpecialist) btnSpecialist.style.display = 'none';
+
+  leadSubmitted = false;
+  updateActionButton();
 
   showToast('Formulário resetado', 'success');
 }
@@ -2410,6 +2439,38 @@ function showToast(message, type) {
 
 window.aiInsights = null;
 
+let leadSubmitted = false;
+
+// Habilita o botão Avaliar Resultados quando Empresa, E-mail e CNPJ estão preenchidos
+function updateActionButton() {
+  const btn = document.getElementById('btnAction');
+  if (!btn) return;
+
+  btn.style.opacity = '';
+  btn.style.pointerEvents = '';
+
+  if (leadSubmitted) {
+    btn.innerHTML = '<span>↺</span> Resetar Tudo';
+    btn.className = 'btn btn-danger btn-center';
+    btn.onclick = resetForm;
+    return;
+  }
+
+  const nome = document.getElementById('leadNome').value.trim();
+  const email = document.getElementById('leadEmail').value.trim();
+  const cnpj = document.getElementById('leadCnpj').value.trim();
+  const ready = nome && email && cnpj;
+
+  btn.innerHTML = '<span>🚀</span> Avaliar Resultados';
+  btn.onclick = avaliarResultados;
+  btn.className = ready ? 'btn btn-primary btn-center' : 'btn btn-secondary btn-center btn-disabled';
+}
+
+['leadNome', 'leadEmail', 'leadCnpj'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateActionButton);
+});
+updateActionButton();
+
 function avaliarResultados() {
   const nome = document.getElementById('leadNome').value.trim();
   const email = document.getElementById('leadEmail').value.trim();
@@ -2500,21 +2561,24 @@ function avaliarResultados() {
         btnPrint.style.pointerEvents = 'auto';
       }
 
+      // Acende o botão Benchmark
+      const btnBenchmark = document.getElementById('btnBenchmark');
+      if (btnBenchmark) btnBenchmark.className = 'btn btn-primary btn-center';
+
+      // Exibe o botão Conversar com um especialista
+      const btnSpecialist = document.getElementById('btnSpecialist');
+      if (btnSpecialist) btnSpecialist.style.display = 'inline-flex';
+
       // Volta o botão de Ação para o estado "Resetar Tudo"
-      btn.innerHTML = '<span>↺</span> Resetar Tudo';
-      btn.className = 'btn btn-danger';
-      btn.onclick = resetForm;
-      btn.style.opacity = '1';
-      btn.style.pointerEvents = 'auto';
+      leadSubmitted = true;
+      updateActionButton();
     } else {
       throw new Error(data.error || 'Erro desconhecido');
     }
   }).catch(err => {
     console.error('Erro ao enviar:', err);
     showToast('Ocorreu um erro ao processar. Tente novamente.', 'error');
-    btn.innerHTML = '<span>🚀</span> Avaliar Resultados';
-    btn.style.opacity = '1';
-    btn.style.pointerEvents = 'auto';
+    updateActionButton();
   });
 }
 
