@@ -1367,7 +1367,7 @@ canvas#radarCanvas {
         <span class="emoji">💾</span>
         Baixar Diagnóstico
       </div>
-      <p class="lead-form-desc">Preencha seus dados abaixo e clique em Avaliar Resultados para salvar as respostas e processar o diagnóstico com IA.</p>
+      <p class="lead-form-desc">Preencha seus dados abaixo e clique em Acessar o relatório para salvar as respostas e processar o diagnóstico com IA.</p>
       
       <div class="lead-form-grid">
         <div>
@@ -1385,7 +1385,7 @@ canvas#radarCanvas {
       </div>
       <div class="actions-bar lead-actions">
         <button class="btn btn-secondary btn-center btn-disabled" onclick="avaliarResultados()" id="btnAction">
-          <span>🚀</span> Avaliar Resultados
+          <span>🚀</span> Acessar o relatório
         </button>
         <button class="btn btn-secondary btn-center btn-disabled" onclick="toggleBenchmark()" id="btnBenchmark">
           <span>📊</span> Benchmark
@@ -1414,7 +1414,7 @@ canvas#radarCanvas {
           <span>📋</span> Copiar
         </button>
         <button class="btn btn-secondary btn-disabled" id="btnPrint" onclick="printPDF()">
-          <span>🖨️</span> Imprimir / PDF
+          <span>🖨️</span> Baixar PDF
         </button>
         <a class="btn btn-specialist" id="btnSpecialist" href="https://calendar.app.google/Mtgyd7A2AxJfviXN8" target="_blank" rel="noopener" style="display: none;">
           <span>💬</span> Conversar com um especialista
@@ -1824,12 +1824,6 @@ function updateCompletion() {
   document.getElementById('completionFill').style.width = pct + '%';
   document.getElementById('completionPct').textContent = Math.round(pct) + '%';
 
-  // Diagnóstico 100%: Gerar Relatório TXT fica amarelo e Copiar acende a cor da letra
-  const isComplete = pct >= 100;
-  const btnReport = document.getElementById('btnReport');
-  if (btnReport) btnReport.className = isComplete ? 'btn btn-primary' : 'btn btn-secondary';
-  const btnCopy = document.getElementById('btnCopy');
-  if (btnCopy) btnCopy.classList.toggle('btn-copy-lit', isComplete);
 }
 
 function updateDimSummary(dimScores) {
@@ -2109,6 +2103,18 @@ function drawRadar(scores, printMode) {
 // ============================================================
 function generateInsights(scores, geral) {
   const container = document.getElementById('insightsContainer');
+  
+  const hasStarted = Object.values(scores).some(val => val > 0);
+  
+  if (!hasStarted) {
+    container.innerHTML = `
+      <div class="insight-item insight-info" style="color: #64748b; background: transparent; justify-content: flex-start; text-align: left; font-style: italic; border: none;">
+        <span class="insight-text">Seus insights aparecerão aqui ao finalizar o diagnóstico.</span>
+      </div>
+    `;
+    return;
+  }
+
   const insights = [];
 
   // Overall
@@ -2474,7 +2480,7 @@ function isValidCnpj(cnpj) {
          calcDigit(digits.slice(0, 13)) === parseInt(digits[13], 10);
 }
 
-// Habilita o botão Avaliar Resultados quando Empresa, E-mail e CNPJ são válidos
+// Habilita o botão Acessar o relatório quando Empresa, E-mail e CNPJ são válidos
 function updateActionButton() {
   const btn = document.getElementById('btnAction');
   if (!btn) return;
@@ -2503,7 +2509,7 @@ function updateActionButton() {
 
   const ready = nome !== '' && emailOk && cnpjOk;
 
-  btn.innerHTML = '<span>🚀</span> Avaliar Resultados';
+  btn.innerHTML = '<span>🚀</span> Acessar o relatório';
   btn.onclick = avaliarResultados;
   btn.className = ready ? 'btn btn-primary btn-center' : 'btn btn-secondary btn-center btn-disabled';
 }
