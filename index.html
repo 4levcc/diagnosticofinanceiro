@@ -1386,7 +1386,7 @@ canvas#radarCanvas {
         <button class="btn btn-secondary btn-center btn-disabled" onclick="avaliarResultados()" id="btnAction">
           <span>🚀</span> Avaliar Resultados
         </button>
-        <button class="btn btn-secondary btn-center" onclick="toggleBenchmark()" id="btnBenchmark">
+        <button class="btn btn-secondary btn-center btn-disabled" onclick="toggleBenchmark()" id="btnBenchmark">
           <span>📊</span> Benchmark
         </button>
       </div>
@@ -1440,7 +1440,7 @@ canvas#radarCanvas {
 <!-- FOOTER -->
 <footer class="site-footer">
   <div class="footer-brand">
-    Desenvolvido por <strong>INOVARE Gestão Estratégica</strong> | <a href="https://www.inovarege.com.br" target="_blank" rel="noopener">www.inovarege.com.br</a> | <a href="https://inovarege.com.br/wp-content/uploads/2026/06/PP.pdf" target="_blank" rel="noopener">Política de Privacidade</a>
+    Desenvolvido por <strong><a href="http://inovarege.com.br" target="_blank" rel="noopener">INOVARE</a> Gestão Estratégica</strong> | <a href="https://inovarege.com.br/wp-content/uploads/2026/06/PP.pdf" target="_blank" rel="noopener">Política de Privacidade</a>
   </div>
   <div class="footer-tagline">
     <span class="rocket">🚀</span> 20 anos de consultoria + IA
@@ -2218,7 +2218,7 @@ function resetForm() {
   const btnBenchmark = document.getElementById('btnBenchmark');
   if (btnBenchmark) {
     btnBenchmark.innerHTML = '<span>📊</span> Benchmark';
-    btnBenchmark.className = 'btn btn-secondary btn-center';
+    btnBenchmark.className = 'btn btn-secondary btn-center btn-disabled';
   }
 
   updateAll();
