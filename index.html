@@ -1132,6 +1132,7 @@ canvas#radarCanvas {
 .lead-form-desc { color: var(--color-text-dim); margin-bottom: 1.5rem; font-size: 0.95rem; }
 .lead-label { display: block; margin-bottom: 0.5rem; color: var(--color-text-dim); font-size: 0.9rem; }
 .lead-input { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; outline: none; }
+.lead-input-invalid { border-color: rgba(239, 68, 68, 0.6) !important; }
 .lead-actions { border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 1.5rem; margin-top: 0.5rem; }
 .grid-col-full { grid-column: 1 / -1; }
 .btn-center { justify-content: center; }
@@ -1379,7 +1380,7 @@ canvas#radarCanvas {
         </div>
         <div class="grid-col-full">
           <label for="leadCnpj" class="lead-label">CNPJ *</label>
-          <input type="text" id="leadCnpj" class="lead-input" placeholder="00.000.000/0000-00">
+          <input type="text" id="leadCnpj" class="lead-input" placeholder="00.000.000/0000-00" maxlength="18" inputmode="numeric">
         </div>
       </div>
       <div class="actions-bar lead-actions">
@@ -2441,7 +2442,39 @@ window.aiInsights = null;
 
 let leadSubmitted = false;
 
-// Habilita o botão Avaliar Resultados quando Empresa, E-mail e CNPJ estão preenchidos
+// Máscara de CNPJ: formata enquanto digita (00.000.000/0000-00)
+function maskCnpj(value) {
+  const digits = value.replace(/\D/g, '').slice(0, 14);
+  return digits
+    .replace(/^(\d{2})(\d)/, '$1.$2')
+    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d)/, '.$1/$2')
+    .replace(/(\d{4})(\d)/, '$1-$2');
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+}
+
+// Valida CNPJ com os dois dígitos verificadores
+function isValidCnpj(cnpj) {
+  const digits = cnpj.replace(/\D/g, '');
+  if (digits.length !== 14 || /^(\d)\1{13}$/.test(digits)) return false;
+  const calcDigit = (base) => {
+    let factor = base.length - 7;
+    let sum = 0;
+    for (let i = 0; i < base.length; i++) {
+      sum += parseInt(base[i], 10) * factor;
+      factor = factor === 2 ? 9 : factor - 1;
+    }
+    const rest = sum % 11;
+    return rest < 2 ? 0 : 11 - rest;
+  };
+  return calcDigit(digits.slice(0, 12)) === parseInt(digits[12], 10) &&
+         calcDigit(digits.slice(0, 13)) === parseInt(digits[13], 10);
+}
+
+// Habilita o botão Avaliar Resultados quando Empresa, E-mail e CNPJ são válidos
 function updateActionButton() {
   const btn = document.getElementById('btnAction');
   if (!btn) return;
@@ -2456,15 +2489,29 @@ function updateActionButton() {
     return;
   }
 
-  const nome = document.getElementById('leadNome').value.trim();
-  const email = document.getElementById('leadEmail').value.trim();
-  const cnpj = document.getElementById('leadCnpj').value.trim();
-  const ready = nome && email && cnpj;
+  const nomeEl = document.getElementById('leadNome');
+  const emailEl = document.getElementById('leadEmail');
+  const cnpjEl = document.getElementById('leadCnpj');
+
+  const nome = nomeEl.value.trim();
+  const emailOk = isValidEmail(emailEl.value.trim());
+  const cnpjOk = isValidCnpj(cnpjEl.value);
+
+  // Feedback visual: campo preenchido mas inválido ganha borda vermelha
+  emailEl.classList.toggle('lead-input-invalid', emailEl.value.trim() !== '' && !emailOk);
+  cnpjEl.classList.toggle('lead-input-invalid', cnpjEl.value.trim() !== '' && !cnpjOk);
+
+  const ready = nome !== '' && emailOk && cnpjOk;
 
   btn.innerHTML = '<span>🚀</span> Avaliar Resultados';
   btn.onclick = avaliarResultados;
   btn.className = ready ? 'btn btn-primary btn-center' : 'btn btn-secondary btn-center btn-disabled';
 }
+
+const cnpjInput = document.getElementById('leadCnpj');
+cnpjInput.addEventListener('input', () => {
+  cnpjInput.value = maskCnpj(cnpjInput.value);
+});
 
 ['leadNome', 'leadEmail', 'leadCnpj'].forEach(id => {
   document.getElementById(id).addEventListener('input', updateActionButton);
@@ -2477,8 +2524,16 @@ function avaliarResultados() {
   const cnpj = document.getElementById('leadCnpj').value.trim();
   const btn = document.getElementById('btnAction');
 
-  if (!nome || !email || !cnpj) {
-    showToast('Por favor, preencha Empresa, E-mail e CNPJ.', 'error');
+  if (!nome) {
+    showToast('Por favor, preencha o nome da empresa.', 'error');
+    return;
+  }
+  if (!isValidEmail(email)) {
+    showToast('Por favor, informe um e-mail válido.', 'error');
+    return;
+  }
+  if (!isValidCnpj(cnpj)) {
+    showToast('Por favor, informe um CNPJ válido (00.000.000/0000-00).', 'error');
     return;
   }
 
